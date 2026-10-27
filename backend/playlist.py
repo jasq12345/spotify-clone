@@ -32,6 +32,35 @@ class Playlist:
         self.size += 1
         return node
 
+    def insert_after(self, node: SongNode, song: Song) -> SongNode:
+        if node is self.tail:
+            return self.append(song)
+        new_node = SongNode(song)
+        new_node.prev = node
+        new_node.next = node.next
+        node.next.prev = new_node
+        node.next = new_node
+        self.size += 1
+        return new_node
+
+    def insert_before(self, node: SongNode, song: Song) -> SongNode:
+        if node is self.head:
+            return self.prepend(song)
+        return self.insert_after(node.prev, song)
+
+    def find(self, song_id: str) -> SongNode | None:
+        node = self.head
+        while node:
+            if node.song.id == song_id:
+                return node
+            node = node.next
+        return None
+
+    def clear(self):
+        self.head = None
+        self.tail = None
+        self.size = 0
+
     def remove(self, node: SongNode):
         if node.prev:
             node.prev.next = node.next

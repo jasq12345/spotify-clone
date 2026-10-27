@@ -15,4 +15,4 @@ class PlaylistSetupDTO(BaseModel):
 
 class InsertSongAfterSelectedDTO(BaseModel):
     new_song: SongDTO
-    selected_song_id: SongDTO
+    selected_song_id: str
