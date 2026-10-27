@@ -6,11 +6,11 @@ from models.song import Song
 app = FastAPI()
 
 SONGS = [
-    Song(title="cos", artist="cos"),
-    Song(title="cos", artist="cos"),
-    Song(title="cos", artist="cos"),
-    Song(title="cos", artist="cos"),
-    Song(title="cos", artist="cos"),
+    Song(title="cos", artist="cos", duration=180, album="cos"),
+    Song(title="cos", artist="cos", duration=180, album="cos"),
+    Song(title="cos", artist="cos", duration=180, album="cos"),
+    Song(title="cos", artist="cos", duration=180, album="cos"),
+    Song(title="cos", artist="cos", duration=180, album="cos"),
 ]
 
 
