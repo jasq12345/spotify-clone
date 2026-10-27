@@ -12,3 +12,7 @@ class SongDTO(BaseModel):
 class PlaylistSetupDTO(BaseModel):
     songsCount: int = 0
     songs: dict[int, SongDTO] = Field(default_factory=dict)
+
+class InsertSongAfterSelectedDTO(BaseModel):
+    new_song: SongDTO
+    selected_song_id: SongDTO
