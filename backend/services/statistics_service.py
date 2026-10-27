@@ -3,33 +3,25 @@ class StatisticsService:
         self.playlist = playlist
 
     def search_by_artist(self, artist_name):
-        # Implement the logic to search songs by artist in the playlist
-        pass
+        return [song for song in self.playlist if song.artist == artist_name] if self.playlist else []
 
     def search_by_title(self, title):
-        # Implement the logic to search songs by title in the playlist
-        pass
+        return [song for song in self.playlist if song.title == title] if self.playlist else []
 
     def get_number_of_songs(self):
-        # Implement the logic to get the number of songs in the playlist
-        pass
+        return self.playlist.size if self.playlist else 0
 
     def get_first_song(self):
-        # Implement the logic to get the first song in the playlist
-        pass
+        return self.playlist.head.song if self.playlist else None
 
     def get_last_song(self):
-        # Implement the logic to get the last song in the playlist
-        pass
+        return self.playlist.tail.song if self.playlist else None
 
     def find_longest_title_song(self):
-        # Implement the logic to find the song with the longest title in the playlist
-        pass
+        return max(self.playlist, key=lambda song: len(song.title)) if self.playlist else None
 
     def song_percentage_by_artist(self, artist_name):
-        # Implement the logic to calculate the percentage of songs by a specific artist in the playlist
-        pass
+        total_songs = self.get_number_of_songs()
+        songs_by_artist = len(self.search_by_artist(artist_name))
 
-    
-
-    
+        return round((songs_by_artist / total_songs) * 100, 2) if total_songs > 0 else 0.0
