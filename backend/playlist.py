@@ -43,12 +43,29 @@ class Playlist:
             self.tail = node.prev
         node.prev = node.next = None
         self.size -= 1
+        return node.song
+
+    def pop_head(self):
+        if self.head is None:
+            raise IndexError("pop from empty playlist")
+        return self.remove(self.head)
+
+    def pop_tail(self):
+        if self.tail is None:
+            raise IndexError("pop from empty playlist")
+        return self.remove(self.tail)
 
     def __iter__(self):
         node = self.head
         while node:
             yield node.song
             node = node.next
+
+    def __reversed__(self):
+        node = self.tail
+        while node:
+            yield node.song
+            node = node.prev
 
     def __len__(self):
         return self.size
