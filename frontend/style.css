@@ -1,75 +1,7 @@
-
-
-
-
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-header{
-    padding: 10px;
-    display: flex;
-    background-color: black;
-}
-
-.Header1{
-    width: 33%;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-}
-
-.Header2{
-    width: 34%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-
-.Header3{
-    width: 33%;
-    text-align: right;
-    display: flex;
-    align-items: center;
-    justify-content: right;
-}
-
-.ButtonHeader{
-    color: white;
-    background-color: black;
-    border: none;
-    margin: 2%;
-    font-size: 25px;
-}
-
-.Buttons{
-    border-radius: 50%;
-    background-color: #333;
-    border: none;
-    padding: 7px 10px 7px 10px;
-}
-
-img[alt='Home']{
-    height: 20px;
-}
-
-input{
-    margin: 7px;
-    background-color: #333;
-    height: 30px;
-    border-radius: 25px;
-    width: 90%;
-    max-width: 185px;
-    border: none;
-    color: white;
-    padding: 10px;
-}
-
-img[alt='Profile picture']{
-    height: 20px;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -89,8 +21,6 @@ main {
   padding: 16px;
   background: #121212;
   border-radius: 8px;
-  margin: 5px 10px;
-  height: 100%;
 }
 
 .library__header,
@@ -103,11 +33,6 @@ main {
 .library__actions {
   display: flex;
   gap: 8px;
-}
-
-.library__header{
-    background-color: transparent;
-    padding: 0;
 }
 
 .icon-button,
@@ -129,11 +54,6 @@ main {
   border-radius: 50%;
   font-size: 20px;
   color: #fff;
-}
-
-aside{
-    height: 100%;
-    display: block;
 }
 
 .chip {
@@ -196,8 +116,4 @@ aside{
 
 .library__info p img {
   filter: invert(60%) sepia(80%) saturate(500%) hue-rotate(80deg);
-}
-
-button {
-  cursor: pointer;
 }
