@@ -23,16 +23,20 @@ class NavigationService:
             return None
         if self.current.song is not None:
             self.history.append(self.current.song)
-        self.current.song = self.playlist.pop_head()
-        return self.current.song
+        song = self.playlist.pop_head()
+        song.play_count += 1
+        self.current.song = song
+        return song
 
     def prev_song(self) -> Song | None:
         if len(self.history) == 0:
             return None
         if self.current.song is not None:
             self.playlist.prepend(self.current.song)
-        self.current.song = self.history.pop_tail()
-        return self.current.song
+        song = self.history.pop_tail()
+        song.play_count += 1
+        self.current.song = song
+        return song
 
     def get_current_song(self) -> Song | None:
         if self.current.song is not None:

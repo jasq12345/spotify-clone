@@ -61,7 +61,7 @@ class Playlist:
         self.tail = None
         self.size = 0
 
-    def remove(self, node: SongNode):
+    def remove(self, node: SongNode) -> Song:
         if node.prev:
             node.prev.next = node.next
         else:
@@ -74,12 +74,12 @@ class Playlist:
         self.size -= 1
         return node.song
 
-    def pop_head(self):
+    def pop_head(self) -> Song:
         if self.head is None:
             raise IndexError("pop from empty playlist")
         return self.remove(self.head)
 
-    def pop_tail(self):
+    def pop_tail(self) -> Song:
         if self.tail is None:
             raise IndexError("pop from empty playlist")
         return self.remove(self.tail)
