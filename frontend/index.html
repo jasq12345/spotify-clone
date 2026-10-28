@@ -1,47 +1,104 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spotify</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main>
-      <aside class="library">
-        <header class="library__header">
-          <h3>Biblioteka</h3>
-          <div class="library__actions">
-            <button class="icon-button">+</button>
-            <button class="icon-button">
-              <img src="images/expand-solid-full.svg" alt="rozwiń" width="20" height="20" />
-            </button>
-          </div>
-        </header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Clone</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <section class="Header1">
+      <button class="ButtonHeader">&lt;</button>
+      <button class="ButtonHeader">&gt;</button>
+    </section>
 
-        <button class="chip">Playlisty</button>
+    <section class="Header2">
+      <button class="Buttons">
+        <img src="images/home.png.webp" alt="Home">
+      </button>
+      <input type="text" placeholder="What do you want to listen?">
+    </section>
 
-        <div class="library__toolbar">
-          <img src="images/magnifying-glass-solid-full.svg" alt="szukaj"  width="20" height="20" />
-          <button class="sort-button">
-            Ostatnie
-            <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20"/>
+    <section class="Header3">
+      <button class="Buttons">
+        <img src="images/person-silhouette-white-icon.png.webp" alt="Profile picture">
+      </button>
+    </section>
+  </header>
+
+  <main>
+    <aside class="library">
+      <header class="library__header">
+        <h3>Biblioteka</h3>
+        <div class="library__actions">
+          <button class="icon-button">
+            <img src="images/circle-plus-solid-full.svg" alt="dodaj" width="20" height="20">
+          </button>
+          <button class="icon-button">
+            <img src="images/expand-solid-full.svg" alt="rozwiń" width="20" height="20">
           </button>
         </div>
+      </header>
 
-        <ul class="library__list">
-          <li class="library__item">
-            <img class="library__cover" src="images/spotifty.png" alt="okładka" width="48" height="48" />
-            <div class="library__info">
-              <h4>Polubione utwory</h4>
-              <p>
-                <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14" />
-                <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
-              </p>
-            </div>
-          </li>
-        </ul>
-      </aside>
-    </main>
-  </body>
+      <button class="chip">Playlisty</button>
+
+      <div class="library__toolbar">
+        <img src="images/magnifying-glass-solid-full.svg" alt="szukaj" width="20" height="20">
+        <button class="sort-button">
+          Ostatnie
+          <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20">
+        </button>
+      </div>
+
+      <ul class="library__list">
+        <li class="library__item">
+          <img class="library__cover" src="images/spotify.png" alt="okładka" width="48" height="48">
+          <div class="library__info">
+            <h4>Polubione utwory</h4>
+            <p>
+              <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14">
+              <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
+            </p>
+          </div>
+        </li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer>
+    <div class="footer__player">
+      <div class="footer__cover"></div>
+      <div class="footer__track">
+        <p id="title-music">PlaceHolder</p>
+        <p id="author-music">PlaceHolder</p>
+      </div>
+    </div>
+
+    <div class="footer__controls">
+      <div class="footer__buttons">
+        <button class="icon-btn"><img src="images/shuffle-solid-full.svg" alt="losowo"></button>
+        <button class="icon-btn"><img src="images/backward-step-solid-full.svg" alt="wstecz"></button>
+        <button class="icon-btn play-btn"><img src="images/play-solid-full.svg" alt="odtwórz"></button>
+        <button class="icon-btn"><img src="images/forward-step-solid-full.svg" alt="do przodu"></button>
+        <button class="icon-btn"><img src="images/repeat-solid-full.svg" alt="powtórz"></button>
+      </div>
+
+      <div class="footer__progress">
+        <span>0:00</span>
+        <div id="song-line"></div>
+        <span>3:12</span>
+      </div>
+    </div>
+
+    <div class="footer__extras">
+      <button class="icon-btn"><img src="images/list-solid-full.svg" alt="Kolejka"></button>
+      <button class="icon-btn"><img src="images/bluetooth-brands-solid-full.svg" alt="Bluetooth"></button>
+      <button class="icon-btn"><img src="images/volume-solid-full.svg" alt="głośność"></button>
+      <div id="volume-control"></div>
+      <button class="icon-btn"><img src="images/picture-in-picture-solid-full.svg" alt="miniodtwarzacz"></button>
+      <button class="icon-btn"><img src="images/ellipsis-solid-full.svg" alt="więcej"></button>
+    </div>
+  </footer>
+</body>
 </html>

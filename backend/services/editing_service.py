@@ -1,4 +1,4 @@
-from playlist import Playlist
+from structures.playlist import Playlist
 from models.song import Song
 from schemas.playlist.setup_dto import SongDTO
 
