@@ -34,7 +34,7 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 ### 3. Playlist editing
 - [ ] 11. Insert a new song after the currently selected song. *(works by ID, but not for the current song — see C1)*
 - [ ] 12. Insert a new song before the currently selected song. *(see C1)*
-- [x] 13. Delete the currently selected song.
+- [ ] 13. Delete the currently selected song. *(see B3)*
 - [x] 14. Delete a song by entering its ID.
 - [x] 15. Rename a song or update its artist.
 - [ ] 16. Clear the entire playlist after asking the user to confirm. *(endpoint broken — see C2)*

@@ -1,6 +1,7 @@
 from structures.playlist import Playlist
 from models.song import Song
 from schemas.playlist.setup_dto import SongDTO
+from models.current_song import CurrentSong
 
 
 def parse_song_dto(song_dto: SongDTO) -> Song:
@@ -12,10 +13,10 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, playlist: Playlist, history, current_song):
+    def __init__(self, playlist: Playlist, history, current: CurrentSong):
         self.playlist = playlist
         self.history = history
-        self.current_song = current_song
+        self.current = current
 
     def append_song(self, song_dto: SongDTO) -> Playlist:
         song = parse_song_dto(song_dto)
@@ -41,6 +42,7 @@ class EditingService:
 
     def remove_song(self, song_id: str) -> Playlist:
         node = self.playlist.find(song_id)
+        if song_id == self.current.
         if node is not None:
             self.playlist.remove(node)
         return self.playlist
