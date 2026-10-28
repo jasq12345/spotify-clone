@@ -8,31 +8,31 @@ router = APIRouter(prefix="/editing", tags=["editing"])
 
 
 @router.post("/insert-after")
-async def insert_song_after_selected(dto: InsertSongNextToSelectedDTO) -> list[Song]:
+async def insert_song_after_selected(dto: InsertSongNextToSelectedDTO) -> dict[str, list[Song]]:
     playlist = editing_service.insert_song_after_selected(dto.new_song, dto.selected_song_id)
-    return list(playlist)
+    return {"songs": list(playlist)}
 
 @router.post("/insert-before")
-async def insert_song_before_selected(dto: InsertSongNextToSelectedDTO) -> list[Song]:
+async def insert_song_before_selected(dto: InsertSongNextToSelectedDTO) -> dict[str, list[Song]]:
     playlist = editing_service.insert_song_before_selected(dto.new_song, dto.selected_song_id)
-    return list(playlist)
+    return {"songs": list(playlist)}
 
 @router.delete("/remove/{song_id}")
-async def remove_song(song_id: str) -> list[Song]:
+async def remove_song(song_id: str) -> dict[str, list[Song]]:
     playlist = editing_service.remove_song(song_id)
-    return list(playlist)
+    return {"songs": list(playlist)}
 
 @router.patch("/update-title/{song_id}")
-async def update_song_title(song_id: str, dto: UpdateSongTitleDTO) -> list[Song]:
+async def update_song_title(song_id: str, dto: UpdateSongTitleDTO) -> dict[str, list[Song]]:
     playlist = editing_service.update_song_title(song_id, dto.new_title)
-    return list(playlist)
+    return {"songs": list(playlist)}
 
 @router.patch("/update-artist/{song_id}")
-async def update_song_artist(song_id: str, dto: UpdateSongArtistDTO) -> list[Song]:
+async def update_song_artist(song_id: str, dto: UpdateSongArtistDTO) -> dict[str, list[Song]]:
     playlist = editing_service.update_song_artist(song_id, dto.new_artist)
-    return list(playlist)
+    return {"songs": list(playlist)}
 
 @router.delete("/remove-all")
-async def remove_all_songs(confirmation: bool) -> list[Song]:
+async def remove_all_songs(confirmation: bool) -> dict[str, list[Song]]:
     playlist = editing_service.remove_all_songs(confirmation)
-    return list(playlist)
+    return {"songs": list(playlist)}
