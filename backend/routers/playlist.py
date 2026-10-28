@@ -8,12 +8,12 @@ router = APIRouter(prefix="/playlist", tags=["playlist"])
 
 
 @router.post("/setup")
-async def playlist_setup(dto: PlaylistSetupDTO):
+async def playlist_setup(dto: PlaylistSetupDTO) -> dict[str, int]:
     for song in dto.songs.values():
         playlist.append(Song(title=song.title, artist=song.artist))
     return {"songsCount": len(playlist)}
 
 
 @router.get("")
-async def get_playlist() -> list[Song]:
-    return list(playlist)
+async def get_playlist() -> dict[str, list[Song]]:
+    return {"songs": list(playlist)}
