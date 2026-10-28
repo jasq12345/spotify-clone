@@ -1,239 +1,340 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify Clone</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header class="topbar">
-    <div class="topbar__left">
-      <button class="nav-button" aria-label="Wstecz">&lsaquo;</button>
-      <button class="nav-button" aria-label="Dalej">&rsaquo;</button>
-    </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Clone</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <button class="nav-button" aria-label="Wstecz">&lsaquo;</button>
+        <button class="nav-button" aria-label="Dalej">&rsaquo;</button>
+      </div>
 
-    <div class="topbar__center">
-      <button class="home-button" aria-label="Strona główna">
-        <img src="images/home.svg" alt="" width="24" height="24">
-      </button>
-      <label class="search">
-        <img src="images/magnifying-glass-solid-full.svg" alt="" width="20" height="20">
-        <input type="text" placeholder="Czego chcesz posłuchać?">
-      </label>
-    </div>
-
-    <div class="topbar__right">
-      <button class="avatar" aria-label="Profil">
-        <img src="images/avatar.webp" alt="">
-      </button>
-    </div>
-  </header>
-
-  <aside class="library">
-    <header class="library__header">
-      <h3>Biblioteka</h3>
-      <div class="library__actions">
-        <button class="icon-button" aria-label="Dodaj">
-          <img src="images/circle-plus-solid-full.svg" alt="" width="20" height="20">
+      <div class="topbar__center">
+        <button class="home-button" aria-label="Strona główna">
+          <img src="images/home.svg" alt="" width="24" height="24" />
         </button>
-        <button class="icon-button" aria-label="Rozwiń">
-          <img src="images/expand-solid-full.svg" alt="" width="20" height="20">
+        <label class="search">
+          <img
+            src="images/magnifying-glass-solid-full.svg"
+            alt=""
+            width="20"
+            height="20"
+          />
+          <input
+            type="text"
+            placeholder="Czego chcesz posłuchać?"
+            aria-label="Szukaj"
+          />
+        </label>
+      </div>
+
+      <div class="topbar__right">
+        <button class="avatar" aria-label="Profil">
+          <img src="images/person.webp" alt="" />
         </button>
       </div>
     </header>
 
-    <button class="chip">Playlisty</button>
+    <aside class="library panel">
+      <header class="library__header">
+        <h2>Biblioteka</h2>
+        <div class="library__actions">
+          <button class="icon-btn icon-btn--round icon-btn--lg" aria-label="Utwórz">
+            <img src="images/circle-plus-solid-full.svg" alt="" />
+          </button>
+          <button class="icon-btn icon-btn--round" aria-label="Rozwiń bibliotekę">
+            <img src="images/expand-solid-full.svg" alt="" />
+          </button>
+        </div>
+      </header>
 
-    <div class="library__toolbar">
-      <img src="images/magnifying-glass-solid-full.svg" alt="szukaj" width="20" height="20">
-      <button class="sort-button">
-        Ostatnie
-        <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20">
-      </button>
-    </div>
+      <button class="chip">Playlisty</button>
 
-    <ul class="library__list">
-      <li class="library__item">
-        <img class="library__cover" src="images/heart.png" alt="Polubione utwory" width="48" height="48">
-        <div class="library__info">
-          <h4>Polubione utwory</h4>
-          <p>
-            <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14">
-            <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
+      <div class="library__toolbar">
+        <button class="icon-btn icon-btn--round" aria-label="Szukaj w bibliotece">
+          <img src="images/magnifying-glass-solid-full.svg" alt="" />
+        </button>
+        <button class="sort-button">
+          Ostatnie
+          <img src="images/burger.svg" alt="" />
+        </button>
+      </div>
+
+      <ul class="library__list">
+        <li class="library__item library__item--active">
+          <img
+            class="library__cover"
+            src="images/liked.png"
+            alt=""
+            width="48"
+            height="48"
+          />
+          <div class="library__info">
+            <h3>Polubione utwory</h3>
+            <p>
+              <img
+                class="pin"
+                src="images/thumbtack-solid-full.svg"
+                alt="Przypięte"
+                width="12"
+                height="12"
+              />
+              <span
+                >Playlista •
+                <span id="playlist-music-count">636</span> utworów</span
+              >
+            </p>
+          </div>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="main panel">
+      <section class="hero">
+        <img class="hero__cover" src="images/liked.png" alt="Polubione utwory" />
+        <div class="hero__text">
+          <p class="hero__type">Playlista</p>
+          <h1>Polubione utwory</h1>
+          <p class="hero__meta">
+            <img class="avatar-small" src="images/person.webp" alt="" />
+            <strong>Użytkownik</strong>
+            <span class="hero__count">• 636 utworów, ponad 24 godz.</span>
           </p>
         </div>
-      </li>
-    </ul>
-  </aside>
+      </section>
 
-  <main>
-    <section class="hero">
-      <img class="hero__cover" src="images/heart.png" alt="Polubione utwory">
-      <div class="hero__text">
-        <p class="hero__type">Playlista</p>
-        <h1>Polubione utwory</h1>
-        <p class="hero__meta">
-          <span class="avatar avatar--small">
-            <img src="images/avatar.webp" alt="">
-          </span>
-          <strong>Użytkownik</strong>
-          <span class="hero__count">• 636 utworów</span>
-        </p>
-      </div>
-    </section>
-
-    <section class="controls">
-      <div class="controls__left">
-        <button class="play-big" aria-label="Odtwórz">
-          <img src="images/play.svg" alt="" width="28" height="28">
-        </button>
-        <button class="ghost-btn" aria-label="Losowo">
-          <img src="images/shuffle-solid-full.svg" alt="" width="24" height="24">
-        </button>
-        <button class="ghost-btn" aria-label="Pobierz">
-          <img src="images/download.svg" alt="" width="28" height="28">
-        </button>
-      </div>
-      <div class="controls__right">
-        <button class="ghost-btn" aria-label="Szukaj">
-          <img src="images/magnifying-glass-solid-full.svg" alt="" width="20" height="20">
-        </button>
-        <button class="ghost-btn">
-          Lista
-          <img src="images/burger.svg" alt="" width="20" height="20">
-        </button>
-      </div>
-    </section>
-
-    <section class="tracks">
-      <div class="tracks__head">
-        <span>#</span>
-        <span>Tytuł</span>
-        <span>Album</span>
-        <span>Data dodania</span>
-        <span>Czas</span>
-      </div>
-      <ol class="tracks__list">
-        <li class="track">
-          <span class="track__no">1</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 1</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
+      <div class="content">
+        <section class="controls">
+          <div class="controls__left">
+            <button class="play-big" aria-label="Odtwórz">
+              <img src="images/play.svg" alt="" />
+            </button>
+            <button class="ghost-btn" aria-label="Losowo">
+              <img src="images/shuffle-solid-full.svg" alt="" />
+            </button>
+            <button class="ghost-btn" aria-label="Pobierz">
+              <img src="images/download.svg" alt="" />
+            </button>
           </div>
-          <span>Album</span>
-          <span>2 dni temu</span>
-          <span class="track__time">3:12</span>
-        </li>
-        <li class="track">
-          <span class="track__no">2</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 2</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
+          <div class="controls__right">
+            <button class="ghost-btn ghost-btn--sm" aria-label="Szukaj na playliście">
+              <img src="images/magnifying-glass-solid-full.svg" alt="" />
+            </button>
+            <button class="ghost-btn ghost-btn--sm">
+              Lista
+              <img src="images/burger.svg" alt="" />
+            </button>
           </div>
-          <span>Album</span>
-          <span>3 dni temu</span>
-          <span class="track__time">2:45</span>
-        </li>
-        <li class="track">
-          <span class="track__no">3</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 3</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
-          </div>
-          <span>Album</span>
-          <span>tydzień temu</span>
-          <span class="track__time">4:01</span>
-        </li>
-        <li class="track">
-          <span class="track__no">4</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 4</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
-          </div>
-          <span>Album</span>
-          <span>2 tygodnie temu</span>
-          <span class="track__time">3:33</span>
-        </li>
-        <li class="track">
-          <span class="track__no">5</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 5</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
-          </div>
-          <span>Album</span>
-          <span>miesiąc temu</span>
-          <span class="track__time">2:58</span>
-        </li>
-        <li class="track">
-          <span class="track__no">6</span>
-          <div class="track__main">
-            <div class="track__art"></div>
-            <div>
-              <p class="track__title">Przykładowy utwór 6</p>
-              <p class="track__artist">Wykonawca</p>
-            </div>
-          </div>
-          <span>Album</span>
-          <span>2 miesiące temu</span>
-          <span class="track__time">3:20</span>
-        </li>
-      </ol>
-    </section>
-  </main>
+        </section>
 
-  <footer>
-    <div class="footer__player">
-      <div class="footer__cover">
-        <img src="images/cover.jpg" alt="okładka">
-      </div>
-      <div class="footer__track">
-        <p id="title-music">PlaceHolder</p>
-        <p id="author-music">PlaceHolder</p>
-      </div>
-    </div>
+        <section class="tracks">
+          <div class="tracks__head">
+            <span>#</span>
+            <span>Tytuł</span>
+            <span class="col-album">Album</span>
+            <span class="col-date">Data dodania</span>
+            <span class="track__time">Czas</span>
+          </div>
 
-    <div class="footer__controls">
-      <div class="footer__buttons">
-        <button class="icon-btn" aria-label="Losowo"><img src="images/shuffle-solid-full.svg" alt=""></button>
-        <button class="icon-btn" aria-label="Wstecz"><img src="images/backward-step-solid-full.svg" alt=""></button>
-        <button class="icon-btn play-btn" aria-label="Odtwórz">
-          <img src="images/play.svg" alt="">
+          <ol class="tracks__list">
+            <li class="track track--playing">
+              <span class="track__no">1</span>
+              <div class="track__main">
+                <img class="track__art" src="images/cover.jpg" alt="" />
+                <div class="track__text">
+                  <p class="track__title">I Was Made For Lovin' You</p>
+                  <p class="track__artist">KISS</p>
+                </div>
+              </div>
+              <span class="col-album">Dynasty</span>
+              <span class="col-date">2 dni temu</span>
+              <span class="track__time">4:31</span>
+            </li>
+            <li class="track">
+              <span class="track__no">2</span>
+              <div class="track__main">
+                <img class="track__art" src="images/To_Brazil!.jpg" alt="" />
+                <div class="track__text">
+                  <p class="track__title">To Brazil!</p>
+                  <p class="track__artist">Vengaboys</p>
+                </div>
+              </div>
+              <span class="col-album">The Platinum Album</span>
+              <span class="col-date">3 dni temu</span>
+              <span class="track__time">3:07</span>
+            </li>
+            <li class="track">
+              <span class="track__no">3</span>
+              <div class="track__main">
+                <div class="track__art"></div>
+                <div class="track__text">
+                  <p class="track__title">Przykładowy utwór 3</p>
+                  <p class="track__artist">Wykonawca</p>
+                </div>
+              </div>
+              <span class="col-album">Album</span>
+              <span class="col-date">tydzień temu</span>
+              <span class="track__time">4:01</span>
+            </li>
+            <li class="track">
+              <span class="track__no">4</span>
+              <div class="track__main">
+                <div class="track__art"></div>
+                <div class="track__text">
+                  <p class="track__title">Przykładowy utwór 4</p>
+                  <p class="track__artist">Wykonawca</p>
+                </div>
+              </div>
+              <span class="col-album">Album</span>
+              <span class="col-date">2 tygodnie temu</span>
+              <span class="track__time">3:33</span>
+            </li>
+            <li class="track">
+              <span class="track__no">5</span>
+              <div class="track__main">
+                <div class="track__art"></div>
+                <div class="track__text">
+                  <p class="track__title">Przykładowy utwór 5</p>
+                  <p class="track__artist">Wykonawca</p>
+                </div>
+              </div>
+              <span class="col-album">Album</span>
+              <span class="col-date">miesiąc temu</span>
+              <span class="track__time">2:58</span>
+            </li>
+            <li class="track">
+              <span class="track__no">6</span>
+              <div class="track__main">
+                <div class="track__art"></div>
+                <div class="track__text">
+                  <p class="track__title">Przykładowy utwór 6</p>
+                  <p class="track__artist">Wykonawca</p>
+                </div>
+              </div>
+              <span class="col-album">Album</span>
+              <span class="col-date">2 miesiące temu</span>
+              <span class="track__time">3:20</span>
+            </li>
+          </ol>
+        </section>
+      </div>
+    </main>
+
+    <aside class="now panel">
+      <header class="now__header">
+        <button class="icon-btn icon-btn--round" aria-label="Ukryj widok">
+          <img src="images/window-restore-solid-full.svg" alt="" />
         </button>
-        <button class="icon-btn" aria-label="Dalej"><img src="images/forward-step-solid-full.svg" alt=""></button>
-        <button class="icon-btn" aria-label="Powtórz"><img src="images/repeat-solid-full.svg" alt=""></button>
+        <h2 class="now__heading">I Was Made For Lovin' You</h2>
+        <button class="icon-btn icon-btn--round" aria-label="Więcej opcji">
+          <img src="images/ellipsis-solid-full.svg" alt="" />
+        </button>
+        <button class="icon-btn icon-btn--round" aria-label="Pełny ekran">
+          <img src="images/expand-solid-full.svg" alt="" />
+        </button>
+      </header>
+
+      <img
+        class="now__cover"
+        src="images/cover.jpg"
+        alt="Okładka I Was Made For Lovin' You"
+      />
+
+      <div class="now__track">
+        <div class="now__info">
+          <h3>I Was Made For Lovin' You</h3>
+          <p>KISS</p>
+        </div>
+        <div class="now__actions">
+          <button class="icon-btn icon-btn--lg" aria-label="Dodaj do polubionych">
+            <img src="images/circle-plus-solid-full.svg" alt="" />
+          </button>
+          <button class="icon-btn" aria-label="Kopiuj link">
+            <img src="images/arrow-up-right-from-square-solid-full.svg" alt="" />
+          </button>
+        </div>
       </div>
 
-      <div class="footer__progress">
-        <span>0:00</span>
-        <div id="song-line"><div class="bar__fill"></div></div>
-        <span>3:12</span>
-      </div>
-    </div>
+      <section class="now__card">
+        <header class="now__card-head">
+          <h3>Następny w kolejce</h3>
+          <button class="link-button">Otwórz kolejkę</button>
+        </header>
+        <div class="queue-item">
+          <img src="images/To_Brazil!.jpg" alt="" />
+          <div class="queue-item__text">
+            <p class="queue-item__title">To Brazil!</p>
+            <p class="queue-item__artist">Vengaboys</p>
+          </div>
+        </div>
+      </section>
+    </aside>
 
-    <div class="footer__extras">
-      <button class="icon-btn" aria-label="Tekst"><img src="images/microphone-solid-full.svg" alt=""></button>
-      <button class="icon-btn" aria-label="Kolejka"><img src="images/list-solid-full.svg" alt=""></button>
-      <button class="icon-btn" aria-label="Urządzenia"><img src="images/bluetooth-brands-solid-full.svg" alt=""></button>
-      <button class="icon-btn" aria-label="Głośność"><img src="images/volume-solid-full.svg" alt=""></button>
-      <div id="volume-control"><div class="bar__fill"></div></div>
-      <button class="icon-btn" aria-label="Miniodtwarzacz"><img src="images/picture-in-picture-solid-full.svg" alt=""></button>
-    </div>
-  </footer>
-</body>
+    <footer class="player">
+      <div class="player__track">
+        <img class="player__cover" src="images/cover.jpg" alt="Okładka" />
+        <div class="player__info">
+          <p class="player__title" id="title-music">I Was Made For Lovin' You</p>
+          <p class="player__artist" id="author-music">KISS</p>
+        </div>
+        <button class="icon-btn" aria-label="Dodaj do polubionych">
+          <img src="images/circle-plus-solid-full.svg" alt="" />
+        </button>
+      </div>
+
+      <div class="player__controls">
+        <div class="player__buttons">
+          <button class="icon-btn" aria-label="Losowo">
+            <img src="images/shuffle-solid-full.svg" alt="" />
+          </button>
+          <button class="icon-btn" aria-label="Poprzedni">
+            <img src="images/backward-step-solid-full.svg" alt="" />
+          </button>
+          <button class="icon-btn play-btn" aria-label="Odtwórz">
+            <img src="images/play.svg" alt="" />
+          </button>
+          <button class="icon-btn" aria-label="Następny">
+            <img src="images/forward-step-solid-full.svg" alt="" />
+          </button>
+          <button class="icon-btn" aria-label="Powtarzaj">
+            <img src="images/repeat-solid-full.svg" alt="" />
+          </button>
+        </div>
+
+        <div class="progress">
+          <span class="progress__time">0:00</span>
+          <div class="bar" id="song-line"><div class="bar__fill"></div></div>
+          <span class="progress__time">4:31</span>
+        </div>
+      </div>
+
+      <div class="player__extras">
+        <button class="icon-btn" aria-label="Tekst">
+          <img src="images/microphone-solid-full.svg" alt="" />
+        </button>
+        <button class="icon-btn" aria-label="Kolejka">
+          <img src="images/list-solid-full.svg" alt="" />
+        </button>
+        <button class="icon-btn" aria-label="Połącz z urządzeniem">
+          <img src="images/bluetooth-brands-solid-full.svg" alt="" />
+        </button>
+        <button class="icon-btn" aria-label="Wycisz">
+          <img src="images/volume-solid-full.svg" alt="" />
+        </button>
+        <div class="bar bar--volume" id="volume-control">
+          <div class="bar__fill"></div>
+        </div>
+        <button class="icon-btn" aria-label="Miniodtwarzacz">
+          <img src="images/picture-in-picture-solid-full.svg" alt="" />
+        </button>
+        <button class="icon-btn" aria-label="Pełny ekran">
+          <img src="images/expand-solid-full.svg" alt="" />
+        </button>
+      </div>
+    </footer>
+  </body>
 </html>
