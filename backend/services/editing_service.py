@@ -11,7 +11,6 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
         album=song_dto.album or "",
     )
 
-
 class EditingService:
     def __init__(self, playlist: Playlist):
         self.playlist = playlist
