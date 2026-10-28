@@ -98,3 +98,16 @@ class Playlist:
 
     def __len__(self):
         return self.size
+
+class History(Playlist):
+    def __init__(self, overflow: Playlist, max_size: int = 15):
+        super().__init__()
+        self.overflow = overflow
+        self.max_size = max_size
+
+    def append(self, song: Song) -> SongNode:
+        node = super().append(song)
+        if self.size > self.max_size:
+            # oldest song goes back to the end of the queue instead of being lost
+            self.overflow.append(self.pop_head())
+        return node
