@@ -42,3 +42,12 @@ class NavigationService:
         if self.current.song is not None:
             return self.current.song
         return None
+
+    def shuffle_playlist(self) -> None: 
+        import random
+
+        songs = list(self.playlist)
+        random.shuffle(songs)
+        self.playlist.clear()
+        for song in songs:
+            self.playlist.append(song)
