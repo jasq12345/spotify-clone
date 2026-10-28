@@ -5,7 +5,41 @@ Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/hello/User
+POST http://127.0.0.1:8000/playlist/setup
+Content-Type: application/json
+
+{
+  "songsCount": 2,
+  "songs": {
+    "1": {"title": "Song A", "artist": "Artist A"},
+    "2": {"title": "Song B", "artist": "Artist B"}
+  }
+}
+
+###
+
+GET http://127.0.0.1:8000/playlist
 Accept: application/json
 
 ###
+
+GET http://127.0.0.1:8000/navigation/songs
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs/reversed
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/navigation/next
+
+###
+
+POST http://127.0.0.1:8000/navigation/prev
+
+###
+
+GET http://127.0.0.1:8000/navigation/current
+Accept: application/json
