@@ -16,6 +16,16 @@ class EditingService:
         self.playlist = playlist
         self.history = history
 
+    def append_song(self, song_dto: SongDTO) -> Playlist:
+        song = parse_song_dto(song_dto)
+        self.playlist.append(song)
+        return self.playlist
+
+    def prepend_song(self, song_dto: SongDTO) -> Playlist:
+        song = parse_song_dto(song_dto)
+        self.playlist.prepend(song)
+        return self.playlist
+
     def insert_song_after_selected(self, new_song: SongDTO, selected_song_id: str) -> Playlist:
         node = self.playlist.find(selected_song_id)
         if node is not None:
