@@ -12,9 +12,10 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, playlist: Playlist, history):
+    def __init__(self, playlist: Playlist, history, current_song):
         self.playlist = playlist
         self.history = history
+        self.current_song = current_song
 
     def append_song(self, song_dto: SongDTO) -> Playlist:
         song = parse_song_dto(song_dto)
@@ -59,4 +60,5 @@ class EditingService:
     def remove_all_songs(self) -> Playlist:
         self.playlist.clear()
         self.history.clear()
+        self.current_song = None
         return self.playlist
