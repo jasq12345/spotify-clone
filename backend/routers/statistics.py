@@ -1,0 +1,41 @@
+from fastapi import APIRouter
+
+from models.song import Song
+from state import statistics_service
+
+router = APIRouter(prefix="/statistics", tags=["statistics"])
+
+
+@router.get("/artist/{artist_name}")
+async def search_by_artist(artist_name: str) -> list[Song]:
+    return statistics_service.search_by_artist(artist_name)
+
+
+@router.get("/title/{title}")
+async def search_by_title(title: str) -> list[Song]:
+    return statistics_service.search_by_title(title)
+
+
+@router.get("/count")
+async def get_number_of_songs() -> int:
+    return statistics_service.get_number_of_songs()
+
+
+@router.get("/first")
+async def get_first_song() -> Song | None:
+    return statistics_service.get_first_song()
+
+
+@router.get("/last")
+async def get_last_song() -> Song | None:
+    return statistics_service.get_last_song()
+
+
+@router.get("/longest-title")
+async def find_longest_title_song() -> Song | None:
+    return statistics_service.find_longest_title_song()
+
+
+@router.get("/artist/{artist_name}/percentage")
+async def song_percentage_by_artist(artist_name: str) -> float:
+    return statistics_service.song_percentage_by_artist(artist_name)
