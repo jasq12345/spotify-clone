@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from playlist import History
+from structures.history import History
 from models.current_song import CurrentSong
 from models.song import Song
-from playlist import Playlist
+from structures.playlist import Playlist
 
 
 class NavigationService:
