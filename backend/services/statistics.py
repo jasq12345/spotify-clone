@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from models.song import Song
-from playlist import Playlist
+from structures.playlist import Playlist
 
 
 class StatisticsService:

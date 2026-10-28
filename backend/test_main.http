@@ -1,35 +1,123 @@
 # Test your FastAPI endpoints
+# Run top to bottom: setup fills the playlist, GET /playlist saves song IDs for the editing requests.
 
 GET http://127.0.0.1:8000/
 Accept: application/json
 
-###
+### ---------- playlist ----------
 
+### Setup with songs
 POST http://127.0.0.1:8000/playlist/setup
 Content-Type: application/json
 
 {
-  "songsCount": 2,
+  "songsCount": 4,
   "songs": {
     "1": {"title": "Song A", "artist": "Artist A"},
-    "2": {"title": "Song B", "artist": "Artist B"}
+    "2": {"title": "Song B", "artist": "Artist B"},
+    "3": {"title": "A Much Longer Song Title", "artist": "Artist A"},
+    "4": {"title": "Song D", "artist": "Artist C"}
   }
+}
+
+### Setup with empty playlist (adds nothing)
+POST http://127.0.0.1:8000/playlist/setup
+Content-Type: application/json
+
+{}
+
+### Get playlist (saves IDs of first two songs)
+GET http://127.0.0.1:8000/playlist
+Accept: application/json
+
+> {%
+    client.global.set("firstId", response.body[0].id);
+    client.global.set("secondId", response.body[1].id);
+%}
+
+### ---------- statistics ----------
+
+GET http://127.0.0.1:8000/statistics/count
+
+###
+
+GET http://127.0.0.1:8000/statistics/first
+
+###
+
+GET http://127.0.0.1:8000/statistics/last
+
+###
+
+GET http://127.0.0.1:8000/statistics/longest-title
+
+###
+
+GET http://127.0.0.1:8000/statistics/artist/Artist A
+
+###
+
+GET http://127.0.0.1:8000/statistics/artist/Artist A/percentage
+
+###
+
+GET http://127.0.0.1:8000/statistics/title/Song B
+
+### ---------- editing ----------
+
+### Insert after first song
+POST http://127.0.0.1:8000/editing/insert-after
+Content-Type: application/json
+
+{
+  "new_song": {"title": "Inserted After", "artist": "Artist X"},
+  "selected_song_id": "{{firstId}}"
+}
+
+### Insert before first song
+POST http://127.0.0.1:8000/editing/insert-before
+Content-Type: application/json
+
+{
+  "new_song": {"title": "Inserted Before", "artist": "Artist Y", "duration": 200, "album": "Album Y"},
+  "selected_song_id": "{{firstId}}"
+}
+
+### Insert next to unknown ID (playlist unchanged)
+POST http://127.0.0.1:8000/editing/insert-after
+Content-Type: application/json
+
+{
+  "new_song": {"title": "Never Added", "artist": "Nobody"},
+  "selected_song_id": "does-not-exist"
 }
 
 ###
 
-GET http://127.0.0.1:8000/playlist
+PATCH http://127.0.0.1:8000/editing/update-title/{{firstId}}
+Content-Type: application/json
+
+{"new_title": "Song A (renamed)"}
+
+###
+
+PATCH http://127.0.0.1:8000/editing/update-artist/{{firstId}}
+Content-Type: application/json
+
+{"new_artist": "Artist Z"}
+
+###
+
+DELETE http://127.0.0.1:8000/editing/remove/{{secondId}}
+
+### ---------- navigation ----------
+
+GET http://127.0.0.1:8000/navigation/current
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/navigation/songs
-Accept: application/json
-
-###
-
-GET http://127.0.0.1:8000/navigation/songs/reversed
-Accept: application/json
+POST http://127.0.0.1:8000/navigation/next
 
 ###
 
@@ -43,3 +131,29 @@ POST http://127.0.0.1:8000/navigation/prev
 
 GET http://127.0.0.1:8000/navigation/current
 Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs/reversed
+Accept: application/json
+
+### ---------- clear (run last) ----------
+
+### Without confirmation (nothing removed)
+DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=false
+
+###
+
+DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=true
+
+### Navigation on empty playlist
+POST http://127.0.0.1:8000/navigation/next
+
+###
+
+GET http://127.0.0.1:8000/statistics/first
