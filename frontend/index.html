@@ -15,7 +15,7 @@
 
     <div class="topbar__center">
       <button class="home-button" aria-label="Strona główna">
-        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg>
+        <img src="images/home.svg" alt="" width="24" height="24">
       </button>
       <label class="search">
         <img src="images/magnifying-glass-solid-full.svg" alt="" width="20" height="20">
@@ -24,7 +24,9 @@
     </div>
 
     <div class="topbar__right">
-      <button class="avatar" aria-label="Profil">U</button>
+      <button class="avatar" aria-label="Profil">
+        <img src="images/avatar.webp" alt="">
+      </button>
     </div>
   </header>
 
@@ -53,9 +55,7 @@
 
     <ul class="library__list">
       <li class="library__item">
-        <div class="cover cover--small">
-          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </div>
+        <img class="library__cover" src="images/heart.png" alt="Polubione utwory" width="48" height="48">
         <div class="library__info">
           <h4>Polubione utwory</h4>
           <p>
@@ -69,14 +69,14 @@
 
   <main>
     <section class="hero">
-      <div class="cover cover--big">
-        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-      </div>
+      <img class="hero__cover" src="images/heart.png" alt="Polubione utwory">
       <div class="hero__text">
         <p class="hero__type">Playlista</p>
         <h1>Polubione utwory</h1>
         <p class="hero__meta">
-          <span class="avatar avatar--small">U</span>
+          <span class="avatar avatar--small">
+            <img src="images/avatar.webp" alt="">
+          </span>
           <strong>Użytkownik</strong>
           <span class="hero__count">• 636 utworów</span>
         </p>
@@ -86,13 +86,13 @@
     <section class="controls">
       <div class="controls__left">
         <button class="play-big" aria-label="Odtwórz">
-          <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8 5v14l11-7z"/></svg>
+          <img src="images/play.svg" alt="" width="28" height="28">
         </button>
         <button class="ghost-btn" aria-label="Losowo">
           <img src="images/shuffle-solid-full.svg" alt="" width="24" height="24">
         </button>
         <button class="ghost-btn" aria-label="Pobierz">
-          <svg viewBox="0 0 24 24" width="32" height="32"><path d="M11 3h2v9.6l3.3-3.3 1.4 1.4L12 16.4l-5.7-5.7 1.4-1.4 3.3 3.3V3zM5 19h14v2H5z"/></svg>
+          <img src="images/download.svg" alt="" width="28" height="28">
         </button>
       </div>
       <div class="controls__right">
@@ -213,7 +213,7 @@
         <button class="icon-btn" aria-label="Losowo"><img src="images/shuffle-solid-full.svg" alt=""></button>
         <button class="icon-btn" aria-label="Wstecz"><img src="images/backward-step-solid-full.svg" alt=""></button>
         <button class="icon-btn play-btn" aria-label="Odtwórz">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+          <img src="images/play.svg" alt="">
         </button>
         <button class="icon-btn" aria-label="Dalej"><img src="images/forward-step-solid-full.svg" alt=""></button>
         <button class="icon-btn" aria-label="Powtórz"><img src="images/repeat-solid-full.svg" alt=""></button>
