@@ -81,7 +81,7 @@ Person B uses the methods from person A — agree on the names below first, so B
 
 ### Person C — editing, setup, statistics (`services/editing_service.py`, `routers/editing.py`, `routers/playlist.py`, `services/statistics.py`, `routers/statistics.py`, `schemas/`)
 - [ ] **C1.** Insert after/before the **current** song. The current song is not inside `playlist`, so `find(id)` won't find it. After the current song = `playlist.prepend(...)` (it plays next), before = `history.append(...)`. Add endpoints e.g. `POST /editing/insert-after-current` and `/insert-before-current`. (11, 12)
-- [ ] **C2.** Fix `DELETE /editing/remove-all`: the router still passes `confirmation`, but the service no longer accepts it → 500. Bring the confirmation back and also set `current_song.song = None`, otherwise the song keeps playing after clearing. (16)
+- [x] **C2.** Fix `DELETE /editing/remove-all`: the router still passes `confirmation`, but the service no longer accepts it → 500. Bring the confirmation back and also set `current_song.song = None`, otherwise the song keeps playing after clearing. (16)
 - [ ] **C3.** `POST /playlist/setup`: use `parse_song_dto` so `duration` and `album` are kept (right now they are dropped), and decide whether setup should replace the playlist instead of adding to it.
 - [ ] **C4.** Statistics count only the queue, so played songs disappear from count/first/last/search. Count the whole playlist: `history` + `current_song` + `playlist`. (17–21)
 - [ ] **C5.** Plain add: `POST /editing/append` (add at the end of `playlist`) and `POST /editing/prepend` (add at the start — with the queue this means it plays next). Body: `SongDTO`, use `parse_song_dto` + `Playlist.append`/`prepend`.

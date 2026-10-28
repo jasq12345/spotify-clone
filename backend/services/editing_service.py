@@ -40,9 +40,18 @@ class EditingService:
             self.playlist.insert_before(node, parse_song_dto(new_song))
         return self.playlist
 
+    def insert_song_before_current(self, new_song: SongDTO) -> Playlist:
+        self.history.append(parse_song_dto(new_song))
+        return self.playlist
+
+    def insert_song_after_current(self, new_song: SongDTO) -> Playlist:
+        self.playlist.prepend(parse_song_dto(new_song))
+        return self.playlist
+
     def remove_song(self, song_id: str) -> Playlist:
         node = self.playlist.find(song_id)
-        if song_id == self.current.
+        if song_id == self.current.id:
+            self.current.song = None
         if node is not None:
             self.playlist.remove(node)
         return self.playlist
