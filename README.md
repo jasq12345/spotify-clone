@@ -34,7 +34,7 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 ### 3. Playlist editing
 - [ ] 11. Insert a new song after the currently selected song. *(works by ID, but not for the current song — see C1)*
 - [ ] 12. Insert a new song before the currently selected song. *(see C1)*
-- [ ] 13. Delete the currently selected song. *(see B3)*
+- [x] 13. Delete the currently selected song.
 - [x] 14. Delete a song by entering its ID.
 - [x] 15. Rename a song or update its artist.
 - [ ] 16. Clear the entire playlist after asking the user to confirm. *(endpoint broken — see C2)*
@@ -47,9 +47,9 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 - [x] 21. Display the percentage of songs by a searched artist.
 
 ### 5. Additional functionality
-- [ ] 22. Shuffle the playlist by rearranging the existing nodes. *(current version rebuilds nodes, no endpoint — see A2, B1)*
-- [ ] 23. Move the currently selected song to the beginning or end. *(see A3, B2)*
-- [ ] 24. Reverse the playlist by changing the linked-list connections, not by creating a new list. *(see A1, B1)*
+- [x] 22. Shuffle the playlist by rearranging the existing nodes.
+- [x] 23. Move the currently selected song to the beginning or end.
+- [x] 24. Reverse the playlist by changing the linked-list connections, not by creating a new list.
 - [x] 25. Keep track of the number of times each song has been selected. *(`Song.play_count`)*
 
 ### 6. Menu and error handling
@@ -57,7 +57,7 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 - [ ] 27. Continue displaying the menu until the user chooses to exit. *(frontend)*
 - [ ] 28. Validate user input, including invalid menu choices and song IDs. *(frontend)*
 - [ ] 29. Handle an empty playlist and a playlist containing only one song. *(navigation handles it, needs tests — see A4)*
-- [ ] 30. After deleting the selected song, automatically select a sensible replacement if one exists. *(see B3)*
+- [x] 30. After deleting the selected song, automatically select a sensible replacement if one exists.
 
 ## Backend tasks
 
@@ -75,9 +75,9 @@ Person B uses the methods from person A — agree on the names below first, so B
 - [ ] **A4.** Unit tests with pytest for `Playlist` and `History`: empty list, one song, insert/remove at head/tail/middle, `reverse`, `shuffle` (same songs, same size, `prev`/`next` consistent), the `History` 15-song limit. (29)
 
 ### Person B — navigation and current song (`services/navigation.py`, `routers/navigation.py`)
-- [ ] **B1.** Endpoints `POST /navigation/shuffle` and `POST /navigation/reverse` using A2/A1. Remove the old `shuffle_playlist` (it rebuilds nodes). (22, 24)
-- [ ] **B2.** Endpoints `POST /navigation/current/move-to-start` and `/move-to-end`. Decide what "start/end" means with the queue (e.g. start = play it again right after the next song → `playlist.prepend`, end = `playlist.append`), then use A3. (23)
-- [ ] **B3.** `DELETE /navigation/current` — delete the current song and select a replacement: the next song from `playlist`, otherwise the last one from `history`, otherwise nothing. The deleted song must **not** go into `history` and its `play_count` must not change. (13, 30)
+- [x] **B1.** Endpoints `POST /navigation/shuffle` and `POST /navigation/reverse` using A2/A1. Remove the old `shuffle_playlist` (it rebuilds nodes). (22, 24)
+- [x] **B2.** Endpoints `POST /navigation/current/move-to-start` and `/move-to-end`. Decide what "start/end" means with the queue (e.g. start = play it again right after the next song → `playlist.prepend`, end = `playlist.append`), then use A3. (23)
+- [x] **B3.** `DELETE /navigation/current` — delete the current song and select a replacement: the next song from `playlist`, otherwise the last one from `history`, otherwise nothing. The deleted song must **not** go into `history` and its `play_count` must not change. (13, 30)
 
 ### Person C — editing, setup, statistics (`services/editing_service.py`, `routers/editing.py`, `routers/playlist.py`, `services/statistics.py`, `routers/statistics.py`, `schemas/`)
 - [ ] **C1.** Insert after/before the **current** song. The current song is not inside `playlist`, so `find(id)` won't find it. After the current song = `playlist.prepend(...)` (it plays next), before = `history.append(...)`. Add endpoints e.g. `POST /editing/insert-after-current` and `/insert-before-current`. (11, 12)

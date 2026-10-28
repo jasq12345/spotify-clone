@@ -1,8 +1,15 @@
-# Test your FastAPI endpoints
-# Run top to bottom: setup fills the playlist, GET /playlist saves song IDs for the editing requests.
+# Endpoint tests for the JetBrains HTTP client.
+# Restart the server first (state lives in memory), then use "Run All Requests in File".
+# Requests depend on each other and must run top to bottom.
 
 GET http://127.0.0.1:8000/
 Accept: application/json
+
+> {%
+    client.test("root responds", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+%}
 
 ### ---------- playlist ----------
 
@@ -20,48 +27,116 @@ Content-Type: application/json
   }
 }
 
+> {%
+    client.test("setup adds 4 songs", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songsCount === 4, "songsCount " + response.body.songsCount);
+    });
+%}
+
 ### Setup with empty playlist (adds nothing)
 POST http://127.0.0.1:8000/playlist/setup
 Content-Type: application/json
 
 {}
 
+> {%
+    client.test("empty setup is accepted and adds nothing", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songsCount === 4, "songsCount " + response.body.songsCount);
+    });
+%}
+
 ### Get playlist (saves IDs of first two songs)
 GET http://127.0.0.1:8000/playlist
 Accept: application/json
 
 > {%
-    client.global.set("firstId", response.body[0].id);
-    client.global.set("secondId", response.body[1].id);
+    client.test("playlist keeps setup order and unique ids", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 4, "length " + songs.length);
+        client.assert(songs[0].title === "Song A", "first " + songs[0].title);
+        client.assert(songs[3].title === "Song D", "last " + songs[3].title);
+        var ids = songs.map(function (s) { return s.id; });
+        client.assert(new Set(ids).size === 4, "ids not unique");
+    });
+    client.global.set("firstId", response.body.songs[0].id);
+    client.global.set("secondId", response.body.songs[1].id);
 %}
 
 ### ---------- statistics ----------
 
 GET http://127.0.0.1:8000/statistics/count
 
+> {%
+    client.test("count", function () {
+        client.assert(response.body.songsCount === 4, "songsCount " + response.body.songsCount);
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/statistics/first
+
+> {%
+    client.test("first song", function () {
+        client.assert(response.body.song.title === "Song A", "title " + response.body.song.title);
+    });
+%}
 
 ###
 
 GET http://127.0.0.1:8000/statistics/last
 
+> {%
+    client.test("last song", function () {
+        client.assert(response.body.song.title === "Song D", "title " + response.body.song.title);
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/statistics/longest-title
+
+> {%
+    client.test("longest title", function () {
+        client.assert(response.body.song.title === "A Much Longer Song Title", "title " + response.body.song.title);
+    });
+%}
 
 ###
 
 GET http://127.0.0.1:8000/statistics/artist/Artist A
 
+> {%
+    client.test("search by artist", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 2, "length " + songs.length);
+        client.assert(songs.every(function (s) { return s.artist === "Artist A"; }), "wrong artist");
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/statistics/artist/Artist A/percentage
 
+> {%
+    client.test("artist percentage", function () {
+        client.assert(response.body.percentage === 50, "percentage " + response.body.percentage);
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/statistics/title/Song B
+
+> {%
+    client.test("search by title", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 1, "length " + songs.length);
+        client.assert(songs[0].artist === "Artist B", "artist " + songs[0].artist);
+    });
+%}
 
 ### ---------- editing ----------
 
@@ -74,6 +149,13 @@ Content-Type: application/json
   "selected_song_id": "{{firstId}}"
 }
 
+> {%
+    client.test("insert after", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.join("|") === "Song A|Inserted After|Song B|A Much Longer Song Title|Song D", titles.join("|"));
+    });
+%}
+
 ### Insert before first song
 POST http://127.0.0.1:8000/editing/insert-before
 Content-Type: application/json
@@ -82,6 +164,16 @@ Content-Type: application/json
   "new_song": {"title": "Inserted Before", "artist": "Artist Y", "duration": 200, "album": "Album Y"},
   "selected_song_id": "{{firstId}}"
 }
+
+> {%
+    client.test("insert before keeps duration and album", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 6, "length " + songs.length);
+        client.assert(songs[0].title === "Inserted Before", "first " + songs[0].title);
+        client.assert(songs[1].title === "Song A", "second " + songs[1].title);
+        client.assert(songs[0].duration === 200 && songs[0].album === "Album Y", "duration/album lost");
+    });
+%}
 
 ### Insert next to unknown ID (playlist unchanged)
 POST http://127.0.0.1:8000/editing/insert-after
@@ -92,12 +184,27 @@ Content-Type: application/json
   "selected_song_id": "does-not-exist"
 }
 
+> {%
+    client.test("unknown id changes nothing", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 6, "length " + songs.length);
+        client.assert(!songs.some(function (s) { return s.title === "Never Added"; }), "song was added");
+    });
+%}
+
 ###
 
 PATCH http://127.0.0.1:8000/editing/update-title/{{firstId}}
 Content-Type: application/json
 
 {"new_title": "Song A (renamed)"}
+
+> {%
+    client.test("update title", function () {
+        var song = response.body.songs.filter(function (s) { return s.id === client.global.get("firstId"); })[0];
+        client.assert(song.title === "Song A (renamed)", "title " + song.title);
+    });
+%}
 
 ###
 
@@ -106,54 +213,261 @@ Content-Type: application/json
 
 {"new_artist": "Artist Z"}
 
+> {%
+    client.test("update artist", function () {
+        var song = response.body.songs.filter(function (s) { return s.id === client.global.get("firstId"); })[0];
+        client.assert(song.artist === "Artist Z", "artist " + song.artist);
+        client.assert(song.title === "Song A (renamed)", "title changed back");
+    });
+%}
+
 ###
 
 DELETE http://127.0.0.1:8000/editing/remove/{{secondId}}
 
+> {%
+    client.test("remove by id", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 5, "length " + songs.length);
+        client.assert(!songs.some(function (s) { return s.id === client.global.get("secondId"); }), "song still there");
+    });
+%}
+
 ### ---------- navigation ----------
+# queue now: Inserted Before, Song A (renamed), Inserted After, A Much Longer Song Title, Song D
 
 GET http://127.0.0.1:8000/navigation/current
 Accept: application/json
 
+> {%
+    client.test("nothing selected before first next", function () {
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+        client.assert(response.body.message === "No song selected", "message " + response.body.message);
+    });
+%}
+
 ###
 
 POST http://127.0.0.1:8000/navigation/next
 
+> {%
+    client.test("first next selects first song", function () {
+        client.assert(response.body.song.title === "Inserted Before", "title " + response.body.song.title);
+        client.assert(response.body.song.play_count === 1, "play_count " + response.body.song.play_count);
+    });
+%}
+
 ###
 
 POST http://127.0.0.1:8000/navigation/next
+
+> {%
+    client.test("next", function () {
+        client.assert(response.body.song.title === "Song A (renamed)", "title " + response.body.song.title);
+    });
+%}
 
 ###
 
 POST http://127.0.0.1:8000/navigation/prev
 
+> {%
+    client.test("prev goes back and counts the play", function () {
+        client.assert(response.body.song.title === "Inserted Before", "title " + response.body.song.title);
+        client.assert(response.body.song.play_count === 2, "play_count " + response.body.song.play_count);
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/navigation/current
 Accept: application/json
+
+> {%
+    client.test("current song has title and artist", function () {
+        client.assert(response.body.song.title === "Inserted Before", "title " + response.body.song.title);
+        client.assert(response.body.song.artist === "Artist Y", "artist " + response.body.song.artist);
+    });
+%}
 
 ###
 
 GET http://127.0.0.1:8000/navigation/songs
 Accept: application/json
 
+> {%
+    client.test("songs shows the remaining queue", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.join("|") === "Song A (renamed)|Inserted After|A Much Longer Song Title|Song D", titles.join("|"));
+    });
+%}
+
 ###
 
 GET http://127.0.0.1:8000/navigation/songs/reversed
 Accept: application/json
+
+> {%
+    client.test("songs reversed", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.join("|") === "Song D|A Much Longer Song Title|Inserted After|Song A (renamed)", titles.join("|"));
+    });
+%}
+
+### Shuffle the queue (relinks existing nodes)
+POST http://127.0.0.1:8000/navigation/shuffle
+
+> {%
+    client.test("shuffle keeps the same songs", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.length === 4, "length " + titles.length);
+        client.assert(titles.slice().sort().join("|") === "A Much Longer Song Title|Inserted After|Song A (renamed)|Song D", titles.join("|"));
+        client.global.set("shuffled", titles.join("|"));
+    });
+%}
+
+### Reverse the queue (swaps prev/next)
+POST http://127.0.0.1:8000/navigation/reverse
+
+> {%
+    client.test("reverse flips the shuffled order", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.slice().reverse().join("|") === client.global.get("shuffled"), titles.join("|"));
+    });
+%}
+
+### Play one song so history is not empty
+POST http://127.0.0.1:8000/navigation/next
+
+> {%
+    client.test("next after reverse", function () {
+        client.assert(response.body.song !== null, "no song");
+        client.global.set("currentId", response.body.song.id);
+    });
+%}
+
+### Current song becomes the first one (history moves to the front of the queue)
+POST http://127.0.0.1:8000/navigation/current/move-to-start
+
+> {%
+    client.test("move-to-start keeps the current song", function () {
+        client.assert(response.body.song.id === client.global.get("currentId"), "current changed");
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs
+
+> {%
+    client.test("after move-to-start history is at the front of the queue", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.length === 4, "length " + titles.length);
+        client.assert(titles[0] === "Inserted Before", "first " + titles[0]);
+    });
+%}
+
+### Current song becomes the last one (queue moves to history)
+POST http://127.0.0.1:8000/navigation/current/move-to-end
+
+> {%
+    client.test("move-to-end keeps the current song", function () {
+        client.assert(response.body.song.id === client.global.get("currentId"), "current changed");
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs
+
+> {%
+    client.test("after move-to-end nothing is left after the current song", function () {
+        client.assert(response.body.songs.length === 0, "length " + response.body.songs.length);
+    });
+%}
+
+### Next wraps around to the first song
+POST http://127.0.0.1:8000/navigation/next
+
+> {%
+    client.test("loop: next after the last song is the first one", function () {
+        client.assert(response.body.song.title === "Inserted Before", "title " + response.body.song.title);
+    });
+%}
+
+### Delete current song, next one gets selected
+DELETE http://127.0.0.1:8000/navigation/current
+
+> {%
+    client.test("delete current selects a replacement", function () {
+        client.assert(response.body.song !== null, "no replacement");
+        client.assert(response.body.song.title !== "Inserted Before", "deleted song still selected");
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/navigation/songs
+
+> {%
+    client.test("deleted song is gone", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.length === 3, "length " + titles.length);
+        client.assert(titles.indexOf("Inserted Before") === -1, "deleted song still in queue");
+    });
+%}
 
 ### ---------- clear (run last) ----------
 
 ### Without confirmation (nothing removed)
 DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=false
 
+> {%
+    client.test("remove-all without confirmation keeps songs", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songs.length === 3, "length " + response.body.songs.length);
+    });
+%}
+
 ###
 
 DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=true
 
+> {%
+    client.test("remove-all with confirmation clears the playlist", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songs.length === 0, "length " + response.body.songs.length);
+    });
+%}
+
 ### Navigation on empty playlist
 POST http://127.0.0.1:8000/navigation/next
+
+> {%
+    client.test("next on empty playlist does not crash", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/navigation/prev
+
+> {%
+    client.test("prev on empty playlist does not crash", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    });
+%}
 
 ###
 
 GET http://127.0.0.1:8000/statistics/first
+
+> {%
+    client.test("statistics on empty playlist", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    });
+%}
