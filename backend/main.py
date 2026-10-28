@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from routers import navigation, playlist, statistics
-#hello
-from models.song import Song
 
 app = FastAPI()
 
