@@ -12,8 +12,9 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, playlist: Playlist):
+    def __init__(self, playlist: Playlist, history):
         self.playlist = playlist
+        self.history = history
 
     def insert_song_after_selected(self, new_song: SongDTO, selected_song_id: str) -> Playlist:
         node = self.playlist.find(selected_song_id)
@@ -45,7 +46,7 @@ class EditingService:
             node.song.artist = new_artist
         return self.playlist
 
-    def remove_all_songs(self, confirmation: bool) -> Playlist:
-        if confirmation:
-            self.playlist.clear()
+    def remove_all_songs(self) -> Playlist:
+        self.playlist.clear()
+        self.history.clear()
         return self.playlist
