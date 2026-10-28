@@ -84,6 +84,28 @@ class Playlist:
             raise IndexError("pop from empty playlist")
         return self.remove(self.tail)
 
+    def reverse(self):
+        current = self.head
+        self.head, self.tail = self.tail, self.head
+        while current:
+            current.prev, current.next = current.next, current.prev
+            current = current.prev
+
+    def shuffle(self):
+        pass
+
+    def move_to_head(self, node: SongNode):
+        if node is self.head:
+            return
+        self.remove(node)
+        self.prepend(node.song)
+
+    def move_to_tail(self, node: SongNode):
+        if node is self.tail:
+            return
+        self.remove(node)
+        self.append(node.song)
+
     def __iter__(self):
         node = self.head
         while node:
