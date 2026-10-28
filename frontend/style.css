@@ -1,13 +1,7 @@
 * {
-<<<<<<< HEAD
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-=======
   box-sizing: border-box;
   margin: 0;
   padding: 0;
->>>>>>> origin/main
 }
 
 body {
@@ -96,11 +90,6 @@ main {
   padding: 16px;
   background: #121212;
   border-radius: 8px;
-<<<<<<< HEAD
-  margin: 5px 10px;
-  overflow-y: auto;
-=======
->>>>>>> origin/main
 }
 
 .library__header,
@@ -199,7 +188,6 @@ main {
 
 .library__info p img {
   filter: invert(60%) sepia(80%) saturate(500%) hue-rotate(80deg);
-<<<<<<< HEAD
 }
 
 footer {
@@ -318,6 +306,4 @@ footer {
 
 .play-btn:hover img {
   filter: none;
-=======
->>>>>>> origin/main
 }
