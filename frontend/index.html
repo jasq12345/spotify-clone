@@ -7,68 +7,201 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <section class="Header1">
-      <button class="ButtonHeader">&lt;</button>
-      <button class="ButtonHeader">&gt;</button>
-    </section>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button class="nav-button" aria-label="Wstecz">&lsaquo;</button>
+      <button class="nav-button" aria-label="Dalej">&rsaquo;</button>
+    </div>
 
-    <section class="Header2">
-      <button class="Buttons">
-        <img src="images/home.png.webp" alt="Home">
+    <div class="topbar__center">
+      <button class="home-button" aria-label="Strona główna">
+        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3 2 12h3v9h5v-6h4v6h5v-9h3z"/></svg>
       </button>
-      <input type="text" placeholder="What do you want to listen?">
-    </section>
+      <label class="search">
+        <img src="images/magnifying-glass-solid-full.svg" alt="" width="20" height="20">
+        <input type="text" placeholder="Czego chcesz posłuchać?">
+      </label>
+    </div>
 
-    <section class="Header3">
-      <button class="Buttons">
-        <img src="images/person-silhouette-white-icon.png.webp" alt="Profile picture">
-      </button>
-    </section>
+    <div class="topbar__right">
+      <button class="avatar" aria-label="Profil">U</button>
+    </div>
   </header>
 
-  <main>
-    <aside class="library">
-      <header class="library__header">
-        <h3>Biblioteka</h3>
-        <div class="library__actions">
-          <button class="icon-button">
-            <img src="images/circle-plus-solid-full.svg" alt="dodaj" width="20" height="20">
-          </button>
-          <button class="icon-button">
-            <img src="images/expand-solid-full.svg" alt="rozwiń" width="20" height="20">
-          </button>
-        </div>
-      </header>
-
-      <button class="chip">Playlisty</button>
-
-      <div class="library__toolbar">
-        <img src="images/magnifying-glass-solid-full.svg" alt="szukaj" width="20" height="20">
-        <button class="sort-button">
-          Ostatnie
-          <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20">
+  <aside class="library">
+    <header class="library__header">
+      <h3>Biblioteka</h3>
+      <div class="library__actions">
+        <button class="icon-button" aria-label="Dodaj">
+          <img src="images/circle-plus-solid-full.svg" alt="" width="20" height="20">
+        </button>
+        <button class="icon-button" aria-label="Rozwiń">
+          <img src="images/expand-solid-full.svg" alt="" width="20" height="20">
         </button>
       </div>
+    </header>
 
-      <ul class="library__list">
-        <li class="library__item">
-          <img class="library__cover" src="images/spotify.png" alt="okładka" width="48" height="48">
-          <div class="library__info">
-            <h4>Polubione utwory</h4>
-            <p>
-              <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14">
-              <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
-            </p>
+    <button class="chip">Playlisty</button>
+
+    <div class="library__toolbar">
+      <img src="images/magnifying-glass-solid-full.svg" alt="szukaj" width="20" height="20">
+      <button class="sort-button">
+        Ostatnie
+        <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20">
+      </button>
+    </div>
+
+    <ul class="library__list">
+      <li class="library__item">
+        <div class="cover cover--small">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <div class="library__info">
+          <h4>Polubione utwory</h4>
+          <p>
+            <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14">
+            <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
+          </p>
+        </div>
+      </li>
+    </ul>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div class="cover cover--big">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </div>
+      <div class="hero__text">
+        <p class="hero__type">Playlista</p>
+        <h1>Polubione utwory</h1>
+        <p class="hero__meta">
+          <span class="avatar avatar--small">U</span>
+          <strong>Użytkownik</strong>
+          <span class="hero__count">• 636 utworów</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="controls">
+      <div class="controls__left">
+        <button class="play-big" aria-label="Odtwórz">
+          <svg viewBox="0 0 24 24" width="28" height="28"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="ghost-btn" aria-label="Losowo">
+          <img src="images/shuffle-solid-full.svg" alt="" width="24" height="24">
+        </button>
+        <button class="ghost-btn" aria-label="Pobierz">
+          <svg viewBox="0 0 24 24" width="32" height="32"><path d="M11 3h2v9.6l3.3-3.3 1.4 1.4L12 16.4l-5.7-5.7 1.4-1.4 3.3 3.3V3zM5 19h14v2H5z"/></svg>
+        </button>
+      </div>
+      <div class="controls__right">
+        <button class="ghost-btn" aria-label="Szukaj">
+          <img src="images/magnifying-glass-solid-full.svg" alt="" width="20" height="20">
+        </button>
+        <button class="ghost-btn">
+          Lista
+          <img src="images/burger.svg" alt="" width="20" height="20">
+        </button>
+      </div>
+    </section>
+
+    <section class="tracks">
+      <div class="tracks__head">
+        <span>#</span>
+        <span>Tytuł</span>
+        <span>Album</span>
+        <span>Data dodania</span>
+        <span>Czas</span>
+      </div>
+      <ol class="tracks__list">
+        <li class="track">
+          <span class="track__no">1</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 1</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
           </div>
+          <span>Album</span>
+          <span>2 dni temu</span>
+          <span class="track__time">3:12</span>
         </li>
-      </ul>
-    </aside>
+        <li class="track">
+          <span class="track__no">2</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 2</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
+          </div>
+          <span>Album</span>
+          <span>3 dni temu</span>
+          <span class="track__time">2:45</span>
+        </li>
+        <li class="track">
+          <span class="track__no">3</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 3</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
+          </div>
+          <span>Album</span>
+          <span>tydzień temu</span>
+          <span class="track__time">4:01</span>
+        </li>
+        <li class="track">
+          <span class="track__no">4</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 4</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
+          </div>
+          <span>Album</span>
+          <span>2 tygodnie temu</span>
+          <span class="track__time">3:33</span>
+        </li>
+        <li class="track">
+          <span class="track__no">5</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 5</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
+          </div>
+          <span>Album</span>
+          <span>miesiąc temu</span>
+          <span class="track__time">2:58</span>
+        </li>
+        <li class="track">
+          <span class="track__no">6</span>
+          <div class="track__main">
+            <div class="track__art"></div>
+            <div>
+              <p class="track__title">Przykładowy utwór 6</p>
+              <p class="track__artist">Wykonawca</p>
+            </div>
+          </div>
+          <span>Album</span>
+          <span>2 miesiące temu</span>
+          <span class="track__time">3:20</span>
+        </li>
+      </ol>
+    </section>
   </main>
 
   <footer>
     <div class="footer__player">
-      <div class="footer__cover"></div>
+      <div class="footer__cover">
+        <img src="images/cover.jpg" alt="okładka">
+      </div>
       <div class="footer__track">
         <p id="title-music">PlaceHolder</p>
         <p id="author-music">PlaceHolder</p>
@@ -77,27 +210,29 @@
 
     <div class="footer__controls">
       <div class="footer__buttons">
-        <button class="icon-btn"><img src="images/shuffle-solid-full.svg" alt="losowo"></button>
-        <button class="icon-btn"><img src="images/backward-step-solid-full.svg" alt="wstecz"></button>
-        <button class="icon-btn play-btn"><img src="images/play-solid-full.svg" alt="odtwórz"></button>
-        <button class="icon-btn"><img src="images/forward-step-solid-full.svg" alt="do przodu"></button>
-        <button class="icon-btn"><img src="images/repeat-solid-full.svg" alt="powtórz"></button>
+        <button class="icon-btn" aria-label="Losowo"><img src="images/shuffle-solid-full.svg" alt=""></button>
+        <button class="icon-btn" aria-label="Wstecz"><img src="images/backward-step-solid-full.svg" alt=""></button>
+        <button class="icon-btn play-btn" aria-label="Odtwórz">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Dalej"><img src="images/forward-step-solid-full.svg" alt=""></button>
+        <button class="icon-btn" aria-label="Powtórz"><img src="images/repeat-solid-full.svg" alt=""></button>
       </div>
 
       <div class="footer__progress">
         <span>0:00</span>
-        <div id="song-line"></div>
+        <div id="song-line"><div class="bar__fill"></div></div>
         <span>3:12</span>
       </div>
     </div>
 
     <div class="footer__extras">
-      <button class="icon-btn"><img src="images/list-solid-full.svg" alt="Kolejka"></button>
-      <button class="icon-btn"><img src="images/bluetooth-brands-solid-full.svg" alt="Bluetooth"></button>
-      <button class="icon-btn"><img src="images/volume-solid-full.svg" alt="głośność"></button>
-      <div id="volume-control"></div>
-      <button class="icon-btn"><img src="images/picture-in-picture-solid-full.svg" alt="miniodtwarzacz"></button>
-      <button class="icon-btn"><img src="images/ellipsis-solid-full.svg" alt="więcej"></button>
+      <button class="icon-btn" aria-label="Tekst"><img src="images/microphone-solid-full.svg" alt=""></button>
+      <button class="icon-btn" aria-label="Kolejka"><img src="images/list-solid-full.svg" alt=""></button>
+      <button class="icon-btn" aria-label="Urządzenia"><img src="images/bluetooth-brands-solid-full.svg" alt=""></button>
+      <button class="icon-btn" aria-label="Głośność"><img src="images/volume-solid-full.svg" alt=""></button>
+      <div id="volume-control"><div class="bar__fill"></div></div>
+      <button class="icon-btn" aria-label="Miniodtwarzacz"><img src="images/picture-in-picture-solid-full.svg" alt=""></button>
     </div>
   </footer>
 </body>
