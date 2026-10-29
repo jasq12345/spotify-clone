@@ -26,6 +26,7 @@ class Playlist(SongList):
         next_node.prev = new_node
         node.next = new_node
         self.size += 1
+        self._changed()
         return new_node
 
     def insert_before(self, node: SongNode, song: Song) -> SongNode:
@@ -43,6 +44,7 @@ class Playlist(SongList):
         while current:
             current.prev, current.next = current.next, current.prev
             current = current.prev
+        self._changed()
 
     def shuffle(self):
         nodes = []
@@ -64,6 +66,7 @@ class Playlist(SongList):
             nodes[-1].next = None
             self.head = nodes[0]
             self.tail = nodes[-1]
+        self._changed()
 
     def move_to_head(self, node: SongNode):
         if node is self.head:
