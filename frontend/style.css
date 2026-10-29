@@ -113,12 +113,6 @@ h3 {
 
 .text-btn:hover {
   color: #fff;
-.library {
-  width: 360px;
-  height: 100%;
-  padding: 16px;
-  background: #121212;
-  border-radius: 8px;
 }
 
 .topbar {
@@ -308,8 +302,6 @@ h3 {
   display: flex;
   align-items: center;
   gap: 20px;
-.library__info p img {
-  filter: invert(60%) sepia(80%) saturate(500%) hue-rotate(80deg);
 }
 
 .play-big,
@@ -326,7 +318,6 @@ h3 {
   height: 56px;
   background: var(--green);
 }
-
 .play-big img {
   width: 24px;
 }
