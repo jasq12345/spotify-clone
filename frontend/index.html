@@ -1,104 +1,227 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify Clone</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <section class="Header1">
-      <button class="ButtonHeader">&lt;</button>
-      <button class="ButtonHeader">&gt;</button>
-    </section>
-
-    <section class="Header2">
-      <button class="Buttons">
-        <img src="images/home.png.webp" alt="Home">
-      </button>
-      <input type="text" placeholder="What do you want to listen?">
-    </section>
-
-    <section class="Header3">
-      <button class="Buttons">
-        <img src="images/person-silhouette-white-icon.png.webp" alt="Profile picture">
-      </button>
-    </section>
-  </header>
-
-  <main>
-    <aside class="library">
-      <header class="library__header">
-        <h3>Biblioteka</h3>
-        <div class="library__actions">
-          <button class="icon-button">
-            <img src="images/circle-plus-solid-full.svg" alt="dodaj" width="20" height="20">
-          </button>
-          <button class="icon-button">
-            <img src="images/expand-solid-full.svg" alt="rozwiń" width="20" height="20">
-          </button>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Clone</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="search-wrap">
+        <button class="round-btn">
+          <img src="images/home.svg" alt="home" />
+        </button>
+        <div class="search">
+          <img src="images/magnifying-glass-solid-full.svg" alt="search" />
+          <input type="text" placeholder="What do you want to play?" />
         </div>
-      </header>
+      </div>
+      <button class="round-btn avatar">
+        <img src="images/person.webp" alt="profile" />
+      </button>
+    </header>
 
-      <button class="chip">Playlisty</button>
+    <aside class="library">
+      <div class="row">
+        <h2>Your Library</h2>
+        <div class="group">
+          <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="create" /></button>
+          <button class="icon"><img src="images/expand-solid-full.svg" alt="expand" /></button>
+        </div>
+      </div>
 
-      <div class="library__toolbar">
-        <img src="images/magnifying-glass-solid-full.svg" alt="szukaj" width="20" height="20">
-        <button class="sort-button">
-          Ostatnie
-          <img src="images/burger.svg" alt="widok listy" class="sort-icon" width="20" height="20">
+      <button class="chip">Playlists</button>
+
+      <div class="row">
+        <button class="icon"><img src="images/magnifying-glass-solid-full.svg" alt="search" /></button>
+        <button class="text-btn">
+          Recents
+          <img src="images/burger.svg" alt="" />
         </button>
       </div>
 
-      <ul class="library__list">
-        <li class="library__item">
-          <img class="library__cover" src="images/spotify.png" alt="okładka" width="48" height="48">
-          <div class="library__info">
-            <h4>Polubione utwory</h4>
-            <p>
-              <img src="images/thumbtack-solid-full.svg" alt="przypięte" width="14" height="14">
-              <span>Playlista • <span id="playlist-music-count">636</span> utworów</span>
-            </p>
-          </div>
-        </li>
-      </ul>
+      <div class="playlist active">
+        <img src="images/liked.png" alt="Liked Songs" />
+        <div>
+          <p class="title">Liked Songs</p>
+          <p class="subtitle">
+            <img class="pin" src="images/thumbtack-solid-full.svg" alt="pinned" />
+            Playlist • <span id="playlist-music-count">4</span> songs
+          </p>
+        </div>
+      </div>
     </aside>
-  </main>
 
-  <footer>
-    <div class="footer__player">
-      <div class="footer__cover"></div>
-      <div class="footer__track">
-        <p id="title-music">PlaceHolder</p>
-        <p id="author-music">PlaceHolder</p>
+    <main class="content">
+      <section class="hero">
+        <img src="images/liked.png" alt="Liked Songs" />
+        <div>
+          <p>Playlist</p>
+          <h1>Liked Songs</h1>
+          <p class="hero-info">
+            <img src="images/person.webp" alt="" />
+            <b>User</b> • 4 songs
+          </p>
+        </div>
+      </section>
+
+      <section class="actions">
+        <div>
+          <button class="play-big"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon big"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="icon big"><img src="images/download.svg" alt="download" /></button>
+        </div>
+        <button class="text-btn">
+          List
+          <img src="images/list-solid-full.svg" alt="" />
+        </button>
+      </section>
+
+      <table class="tracks">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th class="hide-mobile">Album</th>
+            <th class="hide-mobile">Date added</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="playing">
+            <td>1</td>
+            <td>
+              <div class="song">
+                <img src="images/cover.jpg" alt="" />
+                <div>
+                  <p class="title">I Was Made For Lovin' You</p>
+                  <p class="subtitle">KISS</p>
+                </div>
+              </div>
+            </td>
+            <td class="hide-mobile">Dynasty</td>
+            <td class="hide-mobile">2 days ago</td>
+            <td>4:31</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>
+              <div class="song">
+                <img src="images/To_Brazil!.jpg" alt="" />
+                <div>
+                  <p class="title">To Brazil!</p>
+                  <p class="subtitle">Vengaboys</p>
+                </div>
+              </div>
+            </td>
+            <td class="hide-mobile">The Platinum Album</td>
+            <td class="hide-mobile">3 days ago</td>
+            <td>3:07</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>
+              <div class="song">
+                <div class="no-cover"></div>
+                <div>
+                  <p class="title">Touch Me</p>
+                  <p class="subtitle">Günther</p>
+                </div>
+              </div>
+            </td>
+            <td class="hide-mobile">Pleasureman</td>
+            <td class="hide-mobile">5 days ago</td>
+            <td>3:39</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>
+              <div class="song">
+                <div class="no-cover"></div>
+                <div>
+                  <p class="title">Boys (Summertime Love)</p>
+                  <p class="subtitle">Sabrina</p>
+                </div>
+              </div>
+            </td>
+            <td class="hide-mobile">Sabrina</td>
+            <td class="hide-mobile">1 week ago</td>
+            <td>3:54</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+
+    <aside class="now-playing">
+      <div class="row">
+        <button class="icon"><img src="images/window-restore-solid-full.svg" alt="hide" /></button>
+        <h3>I Was Made For Lovin' You</h3>
+        <button class="icon"><img src="images/ellipsis-solid-full.svg" alt="more" /></button>
+        <button class="icon"><img src="images/expand-solid-full.svg" alt="expand" /></button>
       </div>
-    </div>
 
-    <div class="footer__controls">
-      <div class="footer__buttons">
-        <button class="icon-btn"><img src="images/shuffle-solid-full.svg" alt="losowo"></button>
-        <button class="icon-btn"><img src="images/backward-step-solid-full.svg" alt="wstecz"></button>
-        <button class="icon-btn play-btn"><img src="images/play-solid-full.svg" alt="odtwórz"></button>
-        <button class="icon-btn"><img src="images/forward-step-solid-full.svg" alt="do przodu"></button>
-        <button class="icon-btn"><img src="images/repeat-solid-full.svg" alt="powtórz"></button>
+      <img class="big-cover" src="images/cover.jpg" alt="I Was Made For Lovin' You cover" />
+
+      <div class="row">
+        <div>
+          <h2>I Was Made For Lovin' You</h2>
+          <p class="subtitle">KISS</p>
+        </div>
+        <div class="group">
+          <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="add" /></button>
+          <button class="icon"><img src="images/arrow-up-right-from-square-solid-full.svg" alt="share" /></button>
+        </div>
       </div>
 
-      <div class="footer__progress">
-        <span>0:00</span>
-        <div id="song-line"></div>
-        <span>3:12</span>
+      <div class="card">
+        <div class="row">
+          <h3>Next in queue</h3>
+          <button class="text-btn">Open queue</button>
+        </div>
+        <div class="song">
+          <img src="images/To_Brazil!.jpg" alt="" />
+          <div>
+            <p class="title">To Brazil!</p>
+            <p class="subtitle">Vengaboys</p>
+          </div>
+        </div>
       </div>
-    </div>
+    </aside>
 
-    <div class="footer__extras">
-      <button class="icon-btn"><img src="images/list-solid-full.svg" alt="Kolejka"></button>
-      <button class="icon-btn"><img src="images/bluetooth-brands-solid-full.svg" alt="Bluetooth"></button>
-      <button class="icon-btn"><img src="images/volume-solid-full.svg" alt="głośność"></button>
-      <div id="volume-control"></div>
-      <button class="icon-btn"><img src="images/picture-in-picture-solid-full.svg" alt="miniodtwarzacz"></button>
-      <button class="icon-btn"><img src="images/ellipsis-solid-full.svg" alt="więcej"></button>
-    </div>
-  </footer>
-</body>
+    <footer class="player">
+      <div class="song">
+        <img src="images/cover.jpg" alt="" />
+        <div>
+          <p class="title" id="title-music">I Was Made For Lovin' You</p>
+          <p class="subtitle" id="author-music">KISS</p>
+        </div>
+        <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="add" /></button>
+      </div>
+
+      <div class="controls">
+        <div class="buttons">
+          <button class="icon"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="icon"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
+          <button class="play-small"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
+          <button class="icon"><img src="images/repeat-solid-full.svg" alt="repeat" /></button>
+        </div>
+        <div class="progress">
+          <span>0:00</span>
+          <div class="bar" id="song-line"><div></div></div>
+          <span>4:31</span>
+        </div>
+      </div>
+
+      <div class="extras">
+        <button class="icon"><img src="images/microphone-solid-full.svg" alt="lyrics" /></button>
+        <button class="icon"><img src="images/list-solid-full.svg" alt="queue" /></button>
+        <button class="icon"><img src="images/bluetooth-brands-solid-full.svg" alt="devices" /></button>
+        <button class="icon"><img src="images/volume-solid-full.svg" alt="volume" /></button>
+        <div class="bar volume" id="volume-control"><div></div></div>
+        <button class="icon"><img src="images/picture-in-picture-solid-full.svg" alt="mini player" /></button>
+      </div>
+    </footer>
+  </body>
 </html>
