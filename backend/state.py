@@ -1,6 +1,6 @@
-from history import History
+from structures.history import History
 from models.current_song import CurrentSong
-from playlist import Playlist
+from structures.playlist import Playlist
 from services.navigation import NavigationService
 from services.statistics import StatisticsService
 from services.editing_service import EditingService
@@ -10,4 +10,4 @@ history = History()
 current_song = CurrentSong()
 navigation_service = NavigationService(playlist, history, current_song)
 statistics_service = StatisticsService(playlist)
-editing_service = EditingService(playlist)
+editing_service = EditingService(playlist, history, current_song)

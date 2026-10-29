@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from pydantic import BaseModel, Field
-
 
 class SongDTO(BaseModel):
     title: str
@@ -12,7 +10,3 @@ class SongDTO(BaseModel):
 class PlaylistSetupDTO(BaseModel):
     songsCount: int = 0
     songs: dict[int, SongDTO] = Field(default_factory=dict)
-
-class InsertSongAfterSelectedDTO(BaseModel):
-    new_song: SongDTO
-    selected_song_id: str

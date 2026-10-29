@@ -9,17 +9,17 @@ router = APIRouter(prefix="/navigation", tags=["navigation"])
 
 
 @router.get("/songs")
-async def display_songs() -> list[Song]:
-    return navigation_service.display_playlist()
+async def display_songs() -> dict[str, list[Song]]:
+    return {"songs": navigation_service.display_playlist()}
 
 
 @router.get("/songs/reversed")
-async def display_songs_reversed() -> list[Song]:
-    return navigation_service.display_playlist_reversed()
+async def display_songs_reversed() -> dict[str, list[Song]]:
+    return {"songs": navigation_service.display_playlist_reversed()}
 
 
 @router.get("/current")
-async def current_song():
+async def current_song() -> dict[str, Song | str | None]:
     song = navigation_service.get_current_song()
     if song is None:
         return {"song": None, "message": "No song selected"}
@@ -27,7 +27,7 @@ async def current_song():
 
 
 @router.post("/next")
-async def next_song():
+async def next_song() -> dict[str, Song | str | None]:
     song = navigation_service.next_song()
     if song is None:
         return {"song": navigation_service.get_current_song(), "message": "End of playlist"}
@@ -35,8 +35,44 @@ async def next_song():
 
 
 @router.post("/prev")
-async def prev_song():
+async def prev_song() -> dict[str, Song | str | None]:
     song = navigation_service.prev_song()
     if song is None:
         return {"song": navigation_service.get_current_song(), "message": "Start of playlist"}
+    return {"song": song}
+
+
+@router.post("/shuffle")
+async def shuffle() -> dict[str, list[Song]]:
+    return {"songs": navigation_service.shuffle()}
+
+
+@router.post("/reverse")
+async def reverse() -> dict[str, list[Song]]:
+    return {"songs": navigation_service.reverse()}
+
+
+@router.post("/current/move-to-start")
+async def move_current_to_start() -> dict[str, Song | str | None]:
+    song = navigation_service.move_current_to_start()
+    if song is None:
+        return {"song": None, "message": "No song selected"}
+    return {"song": song}
+
+
+@router.post("/current/move-to-end")
+async def move_current_to_end() -> dict[str, Song | str | None]:
+    song = navigation_service.move_current_to_end()
+    if song is None:
+        return {"song": None, "message": "No song selected"}
+    return {"song": song}
+
+
+@router.delete("/current")
+async def delete_current() -> dict[str, Song | str | None]:
+    if navigation_service.get_current_song() is None:
+        return {"song": None, "message": "No song selected"}
+    song = navigation_service.delete_current()
+    if song is None:
+        return {"song": None, "message": "Playlist is empty"}
     return {"song": song}
