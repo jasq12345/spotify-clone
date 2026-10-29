@@ -47,7 +47,7 @@ Read-only API over `history` — **no** `DELETE`/`PATCH`/insert endpoints here. 
 - [ ] **B7.** `GET /history/search?title=...&artist=...` — search inside history (case-insensitive), at least one param required → otherwise 422.
 - [ ] **B8.** `POST /history/{song_id}/replay` — queue a song from history to play next (`playlist.prepend(song)`). The song **stays** in history (it's a log), 404 if `history.find(song_id)` is `None`. Returns the updated queue.
 
-### Person C — editing, setup, statistics (`services/editing_service.py`, `routers/editing.py`, `routers/playlist.py`, `services/statistics.py`, `routers/statistics.py`, `schemas/`)
+### Person C — editing, setup, statistics (`services/edit.py`, `routers/editing.py`, `routers/playlist.py`, `services/statistics.py`, `routers/statistics.py`, `schemas/`)
 - [ ] **C3.** `POST /playlist/setup`: use `parse_song_dto` so `duration` and `album` are kept (right now they are dropped), and decide whether setup should replace the playlist instead of adding to it.
 - [ ] **C4.** Statistics count only the queue, so played songs disappear from count/first/last/search. Count the whole playlist: `history` + `current_song` + `playlist`. (17–21)
 - [ ] **C5.** Plain add: `POST /editing/append` (add at the end of `playlist`) and `POST /editing/prepend` (add at the start — with the queue this means it plays next). Body: `SongDTO`, use `parse_song_dto` + `Playlist.append`/`prepend`.
