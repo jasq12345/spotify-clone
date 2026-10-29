@@ -56,8 +56,6 @@ class EditingService:
 
     def remove_song(self, song_id: str) -> Playlist:
         node = self.playlist.find(song_id)
-        if self.current.song is not None and self.current.song.id == song_id:
-            self.current.song = None
         if node is not None:
             self.playlist.remove(node)
         return self.playlist
