@@ -18,8 +18,6 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 
 ## To-do
 ### 3. Playlist editing
-- [ ] 11. Insert a new song after the currently selected song. *(works by ID, but not for the current song — see C1)*
-- [ ] 12. Insert a new song before the currently selected song. *(see C1)*
 - [ ] 16. Clear the entire playlist after asking the user to confirm. *(endpoint broken — see C2)*
 
 ### 6. Menu and error handling
@@ -53,8 +51,7 @@ Read-only API over `history` — **no** `DELETE`/`PATCH`/insert endpoints here. 
 - [ ] **B8.** `POST /history/{song_id}/replay` — queue a song from history to play next (`playlist.prepend(song)`). The song **stays** in history (it's a log), 404 if `history.find(song_id)` is `None`. Returns the updated queue.
 
 ### Person C — editing, setup, statistics (`services/editing_service.py`, `routers/editing.py`, `routers/playlist.py`, `services/statistics.py`, `routers/statistics.py`, `schemas/`)
-- [ ] **C1.** Insert after/before the **current** song. The current song is not inside `playlist`, so `find(id)` won't find it. After the current song = `playlist.prepend(...)` (it plays next), before = `history.append(...)`. Add endpoints e.g. `POST /editing/insert-after-current` and `/insert-before-current`. (11, 12)
-- [ ] **C2.** Fix `DELETE /editing/remove-all`: the router still passes `confirmation`, but the service no longer accepts it → 500. Bring the confirmation back and also set `current_song.song = None`, otherwise the song keeps playing after clearing. (16)
+- [ ] **C2.** Fix `DELETE /editing/remove-all`: the router still passes `confirmation`, but the service no longer accepts it → 500. The service also sets `self.current_song = None` instead of `self.current.song = None`. Bring the confirmation back and also set `current_song.song = None`, otherwise the song keeps playing after clearing. (16)
 - [ ] **C3.** `POST /playlist/setup`: use `parse_song_dto` so `duration` and `album` are kept (right now they are dropped), and decide whether setup should replace the playlist instead of adding to it.
 - [ ] **C4.** Statistics count only the queue, so played songs disappear from count/first/last/search. Count the whole playlist: `history` + `current_song` + `playlist`. (17–21)
 - [ ] **C5.** Plain add: `POST /editing/append` (add at the end of `playlist`) and `POST /editing/prepend` (add at the start — with the queue this means it plays next). Body: `SongDTO`, use `parse_song_dto` + `Playlist.append`/`prepend`.
