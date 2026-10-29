@@ -18,13 +18,18 @@ class EditingService:
         self.history = history
         self.current = current
 
-    def append_song(self, song_dto: SongDTO) -> Playlist:
-        song = parse_song_dto(song_dto)
+    def add_song_at_end(self, new_song: SongDTO) -> Playlist:
+        song = parse_song_dto(new_song)
         self.playlist.append(song)
         return self.playlist
 
-    def prepend_song(self, song_dto: SongDTO) -> Playlist:
-        song = parse_song_dto(song_dto)
+    def append_song(self, new_song: SongDTO) -> Playlist:
+        song = parse_song_dto(new_song)
+        self.playlist.append(song)
+        return self.playlist
+
+    def prepend_song(self, new_song: SongDTO) -> Playlist:
+        song = parse_song_dto(new_song)
         self.playlist.prepend(song)
         return self.playlist
 
