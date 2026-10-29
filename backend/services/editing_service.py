@@ -56,8 +56,6 @@ class EditingService:
 
     def remove_song(self, song_id: str) -> Playlist:
         node = self.playlist.find(song_id)
-        if song_id == self.current.id:
-            self.current.song = None
         if node is not None:
             self.playlist.remove(node)
         return self.playlist
@@ -74,8 +72,10 @@ class EditingService:
             node.song.artist = new_artist
         return self.playlist
 
-    def remove_all_songs(self) -> Playlist:
+    def remove_all_songs(self, confirmation: bool) -> Playlist:
+        if not confirmation:
+            return self.playlist
         self.playlist.clear()
         self.history.clear()
-        self.current_song = None
+        self.current.song = None
         return self.playlist
