@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException
 
 from models.song import Song
-from schemas.editing.editing_dto import InsertSongDTO, UpdateSongArtistDTO, UpdateSongTitleDTO
+from schemas.editing.editing_dto import InsertSongAtCurrentDTO, InsertSongDTO, UpdateSongArtistDTO, UpdateSongTitleDTO
+from schemas.playlist.setup_dto import SongDTO
 from state import editing_service, navigation_service
 
 router = APIRouter(prefix="/editing", tags=["editing"])
@@ -44,11 +45,21 @@ async def remove_all_songs(confirmation: bool) -> dict[str, list[Song]]:
     return {"songs": list(playlist)}
 
 @router.post("/insert-after-current")
-async def insert_song_after_current(dto: InsertSongDTO) -> dict[str, list[Song]]:
+async def insert_song_after_current(dto: InsertSongAtCurrentDTO) -> dict[str, list[Song]]:
     playlist = editing_service.insert_song_after_current(dto.new_song)
     return {"songs": list(playlist)}
 
 @router.post("/insert-before-current")
-async def insert_song_before_current(dto: InsertSongDTO) -> dict[str, list[Song]]:
+async def insert_song_before_current(dto: InsertSongAtCurrentDTO) -> dict[str, list[Song]]:
     playlist = editing_service.insert_song_before_current(dto.new_song)
+    return {"songs": list(playlist)}
+
+@router.post("/append")
+async def append_song(dto: SongDTO) -> dict[str, list[Song]]:
+    playlist = editing_service.append_song(dto)
+    return {"songs": list(playlist)}
+
+@router.post("/prepend")
+async def prepend_song(dto: SongDTO) -> dict[str, list[Song]]:
+    playlist = editing_service.prepend_song(dto)
     return {"songs": list(playlist)}
