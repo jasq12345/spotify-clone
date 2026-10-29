@@ -5,6 +5,7 @@ from structures.playlist import Playlist
 from services.navigation import NavigationService
 from services.statistics import StatisticsService
 from services.edit import EditingService
+from services.history import HistoryService
 
 db.init_db()
 
@@ -18,3 +19,4 @@ current_song = CurrentSong()
 navigation_service = NavigationService(playlist, history, current_song)
 statistics_service = StatisticsService(playlist)
 editing_service = EditingService(playlist, history, current_song)
+history_service = HistoryService(playlist, history)
