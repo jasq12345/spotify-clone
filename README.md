@@ -44,14 +44,25 @@ The queue is saved to `backend/playlist.db` (SQLite) and loaded on startup; hist
 `backend/test_main.http` runs through these endpoints in order — restart the server and use "Run All Requests in File".
 
 ## To-do
-### 6. Menu and error handling
-- [ ] 16. Ask the user to confirm before `DELETE /editing/remove-all` — the backend clears without asking. *(frontend)*
-- [ ] 26. Provide a menu that lets the user choose any operation. *(frontend)*
-- [ ] 27. Continue displaying the menu until the user chooses to exit. *(frontend)*
-- [ ] 28. Validate user input, including invalid menu choices and song IDs. *(frontend)*
-- [ ] 29. Handle an empty playlist and a playlist containing only one song. *(navigation handles it, needs tests — see A4)*
 
-## Backend tasks
+### Backend
+- [ ] **B4.** `GET /history` — played songs, newest first (`reversed(history)`). Response `{"songs": [...]}`.
+- [ ] **B5.** `GET /history/last` — the previously played song (`history.tail`), or `{"song": null, "message": "History is empty"}`.
+- [ ] **B6.** `GET /history/count` — `{"songsCount": len(history), "maxSize": history.max_size}`.
+- [ ] **B7.** `GET /history/search?title=...&artist=...` — search inside history (case-insensitive), at least one param required → otherwise 422.
+- [ ] **B8.** `POST /history/{song_id}/replay` — queue a song from history to play next (`playlist.prepend(song)`). The song **stays** in history (it's a log), 404 if `history.find(song_id)` is `None`. Returns the updated queue.
+- [ ] **B9.** Combined view endpoint — one response with both the queue and the history, so the frontend can render its main view in a single call. Path/shape TBD, e.g. `GET /playlist/view` → `{"songs": [...], "history": [...]}`.
+- [ ] Add `pytest` as a dev dependency and write unit tests for `Playlist`/`History`/`SongList`: empty list, one song, insert/remove at head/tail/middle, `reverse`, `shuffle` (same songs, same size, `prev`/`next` consistent), the `History` 15-song limit, `SongList` can't be instantiated directly, `History` has no `remove`/`insert_*`/`shuffle`/`reverse`.
+- [ ] Delete the empty `backend/dto/` directory — unused, the real DTOs live in `schemas/`.
+
+### Frontend
+- [ ] 16. Ask the user to confirm before `DELETE /editing/remove-all` — the backend clears without asking.
+- [ ] 26. Provide a menu that lets the user choose any operation.
+- [ ] 27. Continue displaying the menu until the user chooses to exit.
+- [ ] 28. Validate user input, including invalid menu choices and song IDs.
+- [ ] 29. Handle an empty playlist and a playlist containing only one song (navigation already handles this backend-side).
+
+## Backend architecture notes
 
 How the backend is built: `playlist` is the live queue (songs still to play), `history` holds the last 15 played songs,
 `current_song` is the song playing now and is **not** inside `playlist` or `history`. All three live in `state.py`.
@@ -63,11 +74,4 @@ Each subclass exposes only what makes sense for it:
 - `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all` and `POST /playlist/setup` clear it.
 
 Each person owns their own files, so nobody edits the same file. `state.py` changes only if really needed — tell the others first.
-
-### Person B — history endpoints (new `services/history_service.py`, new `routers/history.py`)
-Read-only API over `history` — **no** `DELETE`/`PATCH`/insert endpoints here. Register the router in `main.py` and the service in `state.py` (tell the others).
-- [ ] **B4.** `GET /history` — played songs, newest first (`reversed(history)`). Response `{"songs": [...]}`.
-- [ ] **B5.** `GET /history/last` — the previously played song (`history.tail`), or `{"song": null, "message": "History is empty"}`.
-- [ ] **B6.** `GET /history/count` — `{"songsCount": len(history), "maxSize": history.max_size}`.
-- [ ] **B7.** `GET /history/search?title=...&artist=...` — search inside history (case-insensitive), at least one param required → otherwise 422.
-- [ ] **B8.** `POST /history/{song_id}/replay` — queue a song from history to play next (`playlist.prepend(song)`). The song **stays** in history (it's a log), 404 if `history.find(song_id)` is `None`. Returns the updated queue.
+History endpoints live in new `services/history_service.py` + `routers/history.py` — read-only API over `history`, **no** `DELETE`/`PATCH`/insert endpoints there. Register the router in `main.py` and the service in `state.py`.
