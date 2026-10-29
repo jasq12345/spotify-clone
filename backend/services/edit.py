@@ -19,9 +19,11 @@ class EditingService:
         self.history = history
         self.current = current
 
-    def add_song_at_end(self, new_song: SongDTO) -> Playlist:
-        song = parse_song_dto(new_song)
-        self.playlist.append(song)
+    def setup_playlist(self, songs: list[SongDTO]) -> Playlist:
+        # setup replaces everything: queue, history and the current song
+        self.remove_all_songs()
+        for song_dto in songs:
+            self.playlist.append(parse_song_dto(song_dto))
         return self.playlist
 
     def append_song(self, new_song: SongDTO) -> Playlist:
@@ -73,9 +75,7 @@ class EditingService:
             raise LookupError(f"song not found: {song_id}")
         return node
 
-    def remove_all_songs(self, confirmation: bool) -> Playlist:
-        if not confirmation:
-            return self.playlist
+    def remove_all_songs(self) -> Playlist:
         self.playlist.clear()
         self.history.clear()
         self.current.song = None

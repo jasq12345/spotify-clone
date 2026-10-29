@@ -13,6 +13,19 @@ Accept: application/json
 
 ### ---------- playlist ----------
 
+### Setup with empty playlist (setup replaces the playlist)
+POST http://127.0.0.1:8000/playlist/setup
+Content-Type: application/json
+
+{}
+
+> {%
+    client.test("empty setup is accepted and leaves an empty playlist", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songsCount === 0, "songsCount " + response.body.songsCount);
+    });
+%}
+
 ### Setup with songs
 POST http://127.0.0.1:8000/playlist/setup
 Content-Type: application/json
@@ -29,19 +42,6 @@ Content-Type: application/json
 
 > {%
     client.test("setup adds 4 songs", function () {
-        client.assert(response.status === 200, "status " + response.status);
-        client.assert(response.body.songsCount === 4, "songsCount " + response.body.songsCount);
-    });
-%}
-
-### Setup with empty playlist (adds nothing)
-POST http://127.0.0.1:8000/playlist/setup
-Content-Type: application/json
-
-{}
-
-> {%
-    client.test("empty setup is accepted and adds nothing", function () {
         client.assert(response.status === 200, "status " + response.status);
         client.assert(response.body.songsCount === 4, "songsCount " + response.body.songsCount);
     });
@@ -419,22 +419,11 @@ GET http://127.0.0.1:8000/navigation/songs
 
 ### ---------- clear (run last) ----------
 
-### Without confirmation (nothing removed)
-DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=false
+### Clear everything (confirmation happens in the frontend)
+DELETE http://127.0.0.1:8000/editing/remove-all
 
 > {%
-    client.test("remove-all without confirmation keeps songs", function () {
-        client.assert(response.status === 200, "status " + response.status);
-        client.assert(response.body.songs.length === 3, "length " + response.body.songs.length);
-    });
-%}
-
-###
-
-DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=true
-
-> {%
-    client.test("remove-all with confirmation clears the playlist", function () {
+    client.test("remove-all clears the playlist", function () {
         client.assert(response.status === 200, "status " + response.status);
         client.assert(response.body.songs.length === 0, "length " + response.body.songs.length);
     });
@@ -471,3 +460,104 @@ GET http://127.0.0.1:8000/statistics/first
         client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
     });
 %}
+
+### ---------- setup replaces everything, plain add ----------
+
+### Setup keeps duration and album
+POST http://127.0.0.1:8000/playlist/setup
+Content-Type: application/json
+
+{
+  "songs": {
+    "1": {"title": "Song A", "artist": "Artist A", "duration": 180, "album": "Album A"},
+    "2": {"title": "Song B", "artist": "Artist B"}
+  }
+}
+
+> {%
+    client.test("setup with 2 songs", function () {
+        client.assert(response.body.songsCount === 2, "songsCount " + response.body.songsCount);
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/playlist
+
+> {%
+    client.test("setup keeps duration and album", function () {
+        var song = response.body.songs[0];
+        client.assert(song.duration === 180 && song.album === "Album A", JSON.stringify(song));
+    });
+%}
+
+### Play a song, then set up again
+POST http://127.0.0.1:8000/navigation/next
+
+###
+
+POST http://127.0.0.1:8000/playlist/setup
+Content-Type: application/json
+
+{"songs": {"1": {"title": "Song C", "artist": "Artist C"}}}
+
+###
+
+GET http://127.0.0.1:8000/navigation/current
+
+> {%
+    client.test("setup stops the current song", function () {
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    });
+%}
+
+### Prev has no old history to go back to
+POST http://127.0.0.1:8000/navigation/prev
+
+> {%
+    client.test("setup clears history", function () {
+        client.assert(response.body.song.title === "Song C", "title " + response.body.song.title);
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/editing/append
+Content-Type: application/json
+
+{"title": "Appended", "artist": "Artist X", "duration": 120}
+
+> {%
+    client.test("append adds at the end", function () {
+        var songs = response.body.songs;
+        client.assert(songs[songs.length - 1].title === "Appended", "last " + songs[songs.length - 1].title);
+        client.assert(songs[songs.length - 1].duration === 120, "duration lost");
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/editing/prepend
+Content-Type: application/json
+
+{"title": "Prepended", "artist": "Artist Y"}
+
+> {%
+    client.test("prepend adds at the start (plays next)", function () {
+        client.assert(response.body.songs[0].title === "Prepended", "first " + response.body.songs[0].title);
+    });
+%}
+
+### Insert relative to the current song (body has no selected_song_id)
+POST http://127.0.0.1:8000/editing/insert-after-current
+Content-Type: application/json
+
+{"new_song": {"title": "After Current", "artist": "Artist Z"}}
+
+> {%
+    client.test("insert after current plays next", function () {
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(response.body.songs[0].title === "After Current", "first " + response.body.songs[0].title);
+    });
+%}
+

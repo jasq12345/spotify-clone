@@ -5,6 +5,9 @@ class InsertSongDTO(BaseModel): #before or after selected song
     new_song: SongDTO
     selected_song_id: str
 
+class InsertSongAtCurrentDTO(BaseModel): #before or after the current song
+    new_song: SongDTO
+
 class UpdateSongTitleDTO(BaseModel):
     new_title: str = Field(..., min_length=1, max_length=30)
 

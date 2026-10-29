@@ -16,8 +16,36 @@ API: http://127.0.0.1:8000 (docs: http://127.0.0.1:8000/docs)
 ## Frontend
 Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any static server.
 
+## API
+Every request with a body needs the `Content-Type: application/json` header, otherwise FastAPI answers 422.
+Song body (`SongDTO`): `{"title": "...", "artist": "...", "duration": 180, "album": "..."}` — `duration` and `album` are optional.
+The queue is saved to `backend/playlist.db` (SQLite) and loaded on startup; history and the current song live only in memory.
+
+| Method | Path | Body / notes |
+|---|---|---|
+| `POST` | `/playlist/setup` | `{"songs": {"1": SongDTO, ...}}` — **replaces everything**: queue, history and current song. `{}` = empty playlist. |
+| `GET` | `/playlist` | the queue |
+| `POST` | `/editing/append` | `SongDTO` — add at the end of the queue |
+| `POST` | `/editing/prepend` | `SongDTO` — add at the start of the queue (plays next) |
+| `POST` | `/editing/insert-after` / `/insert-before` | `{"new_song": SongDTO, "selected_song_id": "..."}` — next to a song in the queue |
+| `POST` | `/editing/insert-after-current` / `/insert-before-current` | `{"new_song": SongDTO}` — after = plays next, before = goes to history |
+| `PATCH` | `/editing/update-title/{id}` / `/update-artist/{id}` | `{"new_title": "..."}` / `{"new_artist": "..."}` |
+| `DELETE` | `/editing/remove/{id}` | removing the current song selects the next one |
+| `DELETE` | `/editing/remove-all` | clears queue, history and current song — **no confirmation in the backend, the frontend must ask first** |
+| `GET` | `/navigation/songs` / `/songs/reversed` | the queue first→last / last→first |
+| `GET` | `/navigation/current` | current song or `{"song": null, "message": ...}` |
+| `POST` | `/navigation/next` / `/prev` | next wraps to the start when the queue ends |
+| `POST` | `/navigation/shuffle` / `/reverse` | relinks the queue nodes |
+| `POST` | `/navigation/current/move-to-start` / `/move-to-end` | |
+| `DELETE` | `/navigation/current` | delete the current song, select a replacement |
+| `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
+| `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
+
+`backend/test_main.http` runs through these endpoints in order — restart the server and use "Run All Requests in File".
+
 ## To-do
 ### 6. Menu and error handling
+- [ ] 16. Ask the user to confirm before `DELETE /editing/remove-all` — the backend clears without asking. *(frontend)*
 - [ ] 26. Provide a menu that lets the user choose any operation. *(frontend)*
 - [ ] 27. Continue displaying the menu until the user chooses to exit. *(frontend)*
 - [ ] 28. Validate user input, including invalid menu choices and song IDs. *(frontend)*
@@ -32,10 +60,9 @@ Both `Playlist` and `History` inherit from the abstract `SongList` (`structures/
 doubly linked list: `head`/`tail`/`size`, `find`, `pop_head`/`pop_tail`, `clear`, iteration and `len`.
 Each subclass exposes only what makes sense for it:
 - `Playlist` — the queue, fully editable: `append`, `prepend`, `insert_after`/`insert_before`, `remove`, `reverse`, `shuffle`, `move_to_head`/`move_to_tail`.
-- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all` clears it.
+- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all` and `POST /playlist/setup` clear it.
 
 Each person owns their own files, so nobody edits the same file. `state.py` changes only if really needed — tell the others first.
-
 
 ### Person B — history endpoints (new `services/history_service.py`, new `routers/history.py`)
 Read-only API over `history` — **no** `DELETE`/`PATCH`/insert endpoints here. Register the router in `main.py` and the service in `state.py` (tell the others).
