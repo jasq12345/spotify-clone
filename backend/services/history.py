@@ -5,8 +5,8 @@ from structures.history import History
 from structures.playlist import Playlist
 
 class HistoryService:
-    def __init__(self, playlist: Playlist = None):
-        self.history = History()
+    def __init__(self, playlist: Playlist, history: History):
+        self.history = history
         self.playlist = playlist
 
     def get_history(self) -> list[Song]:
