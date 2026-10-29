@@ -21,7 +21,7 @@ class EditingService:
 
     def setup_playlist(self, songs: list[SongDTO]) -> Playlist:
         # setup replaces everything: queue, history and the current song
-        self.remove_all_songs(True)
+        self.remove_all_songs()
         for song_dto in songs:
             self.playlist.append(parse_song_dto(song_dto))
         return self.playlist
@@ -74,9 +74,7 @@ class EditingService:
             node.song.artist = new_artist
         return self.playlist
 
-    def remove_all_songs(self, confirmation: bool) -> Playlist:
-        if not confirmation:
-            return self.playlist
+    def remove_all_songs(self) -> Playlist:
         self.playlist.clear()
         self.history.clear()
         self.current.song = None

@@ -419,21 +419,11 @@ GET http://127.0.0.1:8000/navigation/songs
 
 ### ---------- clear (run last) ----------
 
-### Without confirmation (nothing removed)
-DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=false
+### Clear everything (confirmation happens in the frontend)
+DELETE http://127.0.0.1:8000/editing/remove-all
 
 > {%
-    client.test("remove-all without confirmation is rejected", function () {
-        client.assert(response.status === 400, "status " + response.status);
-    });
-%}
-
-###
-
-DELETE http://127.0.0.1:8000/editing/remove-all?confirmation=true
-
-> {%
-    client.test("remove-all with confirmation clears the playlist", function () {
+    client.test("remove-all clears the playlist", function () {
         client.assert(response.status === 200, "status " + response.status);
         client.assert(response.body.songs.length === 0, "length " + response.body.songs.length);
     });

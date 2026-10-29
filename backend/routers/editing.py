@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from models.song import Song
 from schemas.editing.editing_dto import InsertSongAtCurrentDTO, InsertSongDTO, UpdateSongArtistDTO, UpdateSongTitleDTO
@@ -38,10 +38,9 @@ async def update_song_artist(song_id: str, dto: UpdateSongArtistDTO) -> dict[str
     return {"songs": list(playlist)}
 
 @router.delete("/remove-all")
-async def remove_all_songs(confirmation: bool) -> dict[str, list[Song]]:
-    if not confirmation:
-        raise HTTPException(status_code=400, detail="Clearing the playlist requires confirmation=true")
-    playlist = editing_service.remove_all_songs(confirmation)
+async def remove_all_songs() -> dict[str, list[Song]]:
+    # the user confirms in the frontend before this is called
+    playlist = editing_service.remove_all_songs()
     return {"songs": list(playlist)}
 
 @router.post("/insert-after-current")
