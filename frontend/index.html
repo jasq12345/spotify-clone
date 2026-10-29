@@ -18,7 +18,7 @@
         </button>
         <div class="search">
           <img src="images/magnifying-glass-solid-full.svg" alt="search" />
-          <input type="text" placeholder="What do you want to play?" />
+          <input id="search-input" type="text" placeholder="What do you want to play?" />
         </div>
       </div>
       <button class="round-btn avatar">
@@ -30,7 +30,7 @@
       <div class="row">
         <h2>Your Library</h2>
         <div class="group">
-          <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="create" /></button>
+          <button class="icon" id="btn-add" title="Add song"><img src="images/circle-plus-solid-full.svg" alt="create" /></button>
           <button class="icon"><img src="images/expand-solid-full.svg" alt="expand" /></button>
         </div>
       </div>
@@ -51,7 +51,7 @@
           <p class="title">Liked Songs</p>
           <p class="subtitle">
             <img class="pin" src="images/thumbtack-solid-full.svg" alt="pinned" />
-            Playlist • <span id="playlist-music-count">4</span> songs
+            Playlist • <span id="playlist-music-count">0 songs</span>
           </p>
         </div>
       </div>
@@ -65,15 +65,15 @@
           <h1>Liked Songs</h1>
           <p class="hero-info">
             <img src="images/person.webp" alt="" />
-            <b>User</b> • 4 songs
+            <b>User</b> • <span id="hero-count">0 songs</span>
           </p>
         </div>
       </section>
 
       <section class="actions">
         <div>
-          <button class="play-big"><img src="images/play.svg" alt="play" /></button>
-          <button class="icon big"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="play-big" id="btn-play-big"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon big" id="btn-shuffle-big"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
           <button class="icon big"><img src="images/download.svg" alt="download" /></button>
         </div>
         <button class="text-btn">
@@ -92,26 +92,24 @@
             <th>Time</th>
           </tr>
         </thead>
-        <tbody id="tracks-body">
-          
-        </tbody>
+        <tbody id="tracks-body"></tbody>
       </table>
     </main>
 
     <aside class="now-playing">
       <div class="row">
         <button class="icon"><img src="images/window-restore-solid-full.svg" alt="hide" /></button>
-        <h3>I Was Made For Lovin' You</h3>
+        <h3 id="np-title-top">Nothing playing</h3>
         <button class="icon"><img src="images/ellipsis-solid-full.svg" alt="more" /></button>
         <button class="icon"><img src="images/expand-solid-full.svg" alt="expand" /></button>
       </div>
 
-      <img class="big-cover" src="images/cover.jpg" alt="I Was Made For Lovin' You cover" />
+      <img class="big-cover" src="images/cover.jpg" alt="cover" />
 
       <div class="row">
         <div>
-          <h2>I Was Made For Lovin' You</h2>
-          <p class="subtitle">KISS</p>
+          <h2 id="np-title">Nothing playing</h2>
+          <p class="subtitle" id="np-artist">—</p>
         </div>
         <div class="group">
           <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="add" /></button>
@@ -125,10 +123,10 @@
           <button class="text-btn">Open queue</button>
         </div>
         <div class="song">
-          <img src="images/To_Brazil!.jpg" alt="" />
+          <div class="no-cover"></div>
           <div>
-            <p class="title">To Brazil!</p>
-            <p class="subtitle">Vengaboys</p>
+            <p class="title" id="queue-title">Nothing queued</p>
+            <p class="subtitle" id="queue-artist">—</p>
           </div>
         </div>
       </div>
@@ -138,24 +136,24 @@
       <div class="song">
         <img src="images/cover.jpg" alt="" />
         <div>
-          <p class="title" id="title-music">I Was Made For Lovin' You</p>
-          <p class="subtitle" id="author-music">KISS</p>
+          <p class="title" id="title-music">Nothing playing</p>
+          <p class="subtitle" id="author-music">—</p>
         </div>
         <button class="icon"><img src="images/circle-plus-solid-full.svg" alt="add" /></button>
       </div>
 
       <div class="controls">
         <div class="buttons">
-          <button class="icon"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
-          <button class="icon"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
-          <button class="play-small"><img src="images/play.svg" alt="play" /></button>
-          <button class="icon"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
+          <button class="icon" id="btn-shuffle"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="icon" id="btn-prev"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
+          <button class="play-small" id="btn-play"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon" id="btn-next"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
           <button class="icon"><img src="images/repeat-solid-full.svg" alt="repeat" /></button>
         </div>
         <div class="progress">
           <span>0:00</span>
           <div class="bar" id="song-line"><div></div></div>
-          <span>4:31</span>
+          <span id="duration-music">0:00</span>
         </div>
       </div>
 
@@ -168,5 +166,21 @@
         <button class="icon"><img src="images/picture-in-picture-solid-full.svg" alt="mini player" /></button>
       </div>
     </footer>
+
+    <dialog id="add-dialog">
+      <form id="add-form">
+        <h3>Add song</h3>
+        <input name="title" type="text" placeholder="Title" required />
+        <input name="artist" type="text" placeholder="Artist" required />
+        <input name="album" type="text" placeholder="Album (optional)" />
+        <input name="duration" type="text" placeholder="Length, e.g. 3:45 (optional)" />
+        <div class="dialog-buttons">
+          <button type="button" id="add-cancel" class="text-btn">Cancel</button>
+          <button type="submit" class="dialog-submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" hidden></div>
   </body>
 </html>

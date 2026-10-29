@@ -370,7 +370,7 @@ h3 {
 }
 
 .tracks th:last-child {
-  width: 72px;
+  width: 120px;
 }
 
 .tracks td {
@@ -594,4 +594,106 @@ h3 {
 .logo img{
   width: 50px;
   filter: invert(100%);
+}
+
+.tracks td.empty {
+  height: 80px;
+  text-align: center;
+}
+
+.time-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.row-delete {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--gray);
+  opacity: 0;
+}
+
+.tracks tbody tr:hover .row-delete,
+.row-delete:focus-visible {
+  opacity: 1;
+}
+
+.row-delete:hover {
+  color: #fff;
+  background: #2a2a2a;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 24px;
+  background: #fff;
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.toast.error {
+  background: #e22134;
+  color: #fff;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+#add-dialog {
+  margin: auto;
+  width: 340px;
+  padding: 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--hover);
+  color: #fff;
+}
+
+#add-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+#add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#add-form input {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 14px;
+}
+
+#add-form input:focus {
+  outline: 2px solid #fff;
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.dialog-submit {
+  padding: 10px 24px;
+  border-radius: 24px;
+  background: var(--green);
+  color: #000;
+  font-weight: bold;
 }
