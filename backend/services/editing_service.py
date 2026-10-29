@@ -1,3 +1,4 @@
+from structures.history import History
 from structures.playlist import Playlist
 from models.song import Song
 from schemas.playlist.setup_dto import SongDTO
@@ -12,7 +13,7 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, playlist: Playlist, history):
+    def __init__(self, playlist: Playlist, history: History):
         self.playlist = playlist
         self.history = history
 
