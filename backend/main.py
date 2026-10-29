@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from routers import navigation, playlist, editing, statistics
+from routers import navigation, playlist, editing, statistics, history
 
 app = FastAPI()
 
@@ -22,7 +22,7 @@ app.include_router(playlist.router)
 app.include_router(navigation.router)
 app.include_router(editing.router)
 app.include_router(statistics.router)
-
+app.include_router(history.router)
 
 @app.get("/")
 async def root():
