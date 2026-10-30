@@ -19,5 +19,5 @@ async def get_queue() -> dict[str, list[Song]]:
 
 #combined queue, current and history
 @router.get("/combined")
-async def get_queue_and_history() -> dict[str, list[Song]]:
-    return {"history": list(history), "current": current_song, "queue": list(queue)}
+async def get_queue_and_history() -> dict[str, list[Song] | Song | None]:
+    return {"history": list(history), "current": current_song.song, "queue": list(queue)}

@@ -26,6 +26,7 @@ The queue, history and current song live **only in memory** (gone after a restar
 |---|---|---|
 | `POST` | `/queue/setup` | `{"songs": {"1": SongDTO, ...}}` — **replaces everything**: queue, history and current song. `{}` = empty queue. |
 | `GET` | `/queue` | the queue |
+| `GET` | `/queue/combined` | `{"history": [...], "current": Song \| null, "queue": [...]}` — everything for the main view in one call (history oldest first) |
 | `POST` | `/editing/append` | `SongDTO` — add at the end of the queue |
 | `POST` | `/editing/prepend` | `SongDTO` — add at the start of the queue (plays next) |
 | `POST` | `/editing/insert-after` / `/insert-before` | `{"new_song": SongDTO, "selected_song_id": "..."}` — next to a song in the queue |
@@ -45,11 +46,6 @@ The queue, history and current song live **only in memory** (gone after a restar
 | `POST` | `/history/{id}/replay` | queue a song from history to play next (it stays in history) |
 | `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
 | `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
-
-## To-do
-
-### Backend
-- [ ] **B9.** Combined view endpoint — one response with both the queue and the history, so the frontend can render its main view in a single call, e.g. `GET /queue/view` → `{"songs": [...], "history": [...], "current": Song | null}`.
 
 ## Named playlists
 
