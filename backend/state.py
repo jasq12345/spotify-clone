@@ -9,10 +9,7 @@ from services.history import HistoryService
 
 db.init_db()
 
-queue = SongQueue()
-for song in db.load_queue():
-    queue.append(song)
-queue._on_change = lambda: db.save_queue(queue)
+queue = SongQueue()  # in memory only, the database holds songs and playlists
 
 history = History()
 current_song = CurrentSong()

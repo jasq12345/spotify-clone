@@ -13,10 +13,6 @@ class SongList(ABC):
         self.head: SongNode | None = None
         self.tail: SongNode | None = None
         self.size = 0
-        self._on_change = lambda: None
-
-    def _changed(self) -> None:
-        self._on_change()
 
     @abstractmethod
     def append(self, song: Song) -> SongNode:
@@ -31,7 +27,6 @@ class SongList(ABC):
             self.head.prev = node
         self.head = node
         self.size += 1
-        self._changed()
         return node
 
     def _link_tail(self, node: SongNode) -> SongNode:
@@ -43,7 +38,6 @@ class SongList(ABC):
             self.tail.next = node
         self.tail = node
         self.size += 1
-        self._changed()
         return node
 
     def _unlink(self, node: SongNode) -> Song:
@@ -57,7 +51,6 @@ class SongList(ABC):
             self.tail = node.prev
         node.prev = node.next = None
         self.size -= 1
-        self._changed()
         return node.song
 
     def find(self, song_id: str) -> SongNode | None:
@@ -82,7 +75,6 @@ class SongList(ABC):
         self.head = None
         self.tail = None
         self.size = 0
-        self._changed()
 
     def __iter__(self):
         node = self.head
