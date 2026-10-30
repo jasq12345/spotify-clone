@@ -19,7 +19,7 @@ const state = {
 const el = {
   tracksBody: document.querySelector("#tracks-body"),
   search: document.querySelector("#search-input"),
-  libraryCount: document.querySelector("#playlist-music-count"),
+  libraryCount: document.querySelector("#queue-music-count"),
   heroCount: document.querySelector("#hero-count"),
   playerTitle: document.querySelector("#title-music"),
   playerArtist: document.querySelector("#author-music"),
@@ -151,7 +151,7 @@ function renderTable() {
   el.tracksBody.replaceChildren();
   if (rows.length === 0) {
     const row = make("tr");
-    const cell = make("td", "empty", state.filter ? "No songs match your search" : "Playlist is empty");
+    const cell = make("td", "empty", state.filter ? "No songs match your search" : "Queue is empty");
     cell.colSpan = 5;
     row.append(cell);
     el.tracksBody.append(row);
@@ -192,7 +192,7 @@ function render() {
 }
 
 async function refresh() {
-  const [list, current] = await Promise.all([api("/playlist"), api("/navigation/current")]);
+  const [list, current] = await Promise.all([api("/queue"), api("/navigation/current")]);
   state.queue = list.songs;
   state.current = current.song;
   render();
@@ -202,7 +202,7 @@ async function init() {
   try {
     await refresh();
     if (state.queue.length === 0 && !state.current) {
-      await sendJson("/playlist/setup", "POST", DEMO_SONGS);
+      await sendJson("/queue/setup", "POST", DEMO_SONGS);
       await refresh();
     }
   } catch (error) {
@@ -267,7 +267,7 @@ async function addSong() {
   if (last) {
     await sendJson("/editing/insert-after", "POST", { new_song: song, selected_song_id: last.id });
   } else {
-    await sendJson("/playlist/setup", "POST", { songsCount: 1, songs: { 1: song } });
+    await sendJson("/editing/append", "POST", song);
   }
   el.addForm.reset();
   el.addDialog.close();
