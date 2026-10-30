@@ -1,7 +1,6 @@
 const API = "http://127.0.0.1:8000";
 
 const DEMO_SONGS = {
-  songsCount: 4,
   songs: {
     1: { title: "I Was Made For Lovin' You", artist: "KISS", duration: 271, album: "Dynasty" },
     2: { title: "To Brazil!", artist: "Vengaboys", duration: 187, album: "The Platinum Album" },
@@ -11,16 +10,31 @@ const DEMO_SONGS = {
 };
 
 const state = {
-  queue: [],
+  view: "queue",
+  history: [],
   current: null,
+  queue: [],
+  playlistsReady: true,
+  playlists: [],
+  playlistId: null,
+  playlist: null,
   filter: "",
 };
 
 const el = {
   tracksBody: document.querySelector("#tracks-body"),
   search: document.querySelector("#search-input"),
-  libraryCount: document.querySelector("#queue-music-count"),
+  libQueue: document.querySelector("#lib-queue"),
+  libQueueCount: document.querySelector("#lib-queue-count"),
+  libPlaylists: document.querySelector("#lib-playlists"),
+  libNote: document.querySelector("#lib-note"),
+  newPlaylist: document.querySelector("#btn-new-playlist"),
+  heroType: document.querySelector("#hero-type"),
+  heroTitle: document.querySelector("#hero-title"),
   heroCount: document.querySelector("#hero-count"),
+  clear: document.querySelector("#btn-clear"),
+  rename: document.querySelector("#btn-rename"),
+  deletePlaylist: document.querySelector("#btn-delete-playlist"),
   playerTitle: document.querySelector("#title-music"),
   playerArtist: document.querySelector("#author-music"),
   npTitleTop: document.querySelector("#np-title-top"),
@@ -30,8 +44,18 @@ const el = {
   queueArtist: document.querySelector("#queue-artist"),
   duration: document.querySelector("#duration-music"),
   toast: document.querySelector("#toast"),
-  addDialog: document.querySelector("#add-dialog"),
-  addForm: document.querySelector("#add-form"),
+  songDialog: document.querySelector("#song-dialog"),
+  songForm: document.querySelector("#song-form"),
+  songDialogTitle: document.querySelector("#song-dialog-title"),
+  songDialogSubmit: document.querySelector("#song-dialog-submit"),
+  nameDialog: document.querySelector("#name-dialog"),
+  nameForm: document.querySelector("#name-form"),
+  nameDialogTitle: document.querySelector("#name-dialog-title"),
+  pickDialog: document.querySelector("#pick-dialog"),
+  pickSelect: document.querySelector("#pick-select"),
+  confirmDialog: document.querySelector("#confirm-dialog"),
+  confirmText: document.querySelector("#confirm-text"),
+  confirmOk: document.querySelector("#confirm-ok"),
 };
 
 let toastTimer;
@@ -46,6 +70,17 @@ function showToast(message, isError = false) {
   }, 3000);
 }
 
+function errorMessage(body, status) {
+  const detail = body && body.detail;
+  if (typeof detail === "string") {
+    return detail;
+  }
+  if (Array.isArray(detail) && detail.length > 0) {
+    return detail.map((item) => item.msg).join(", ");
+  }
+  return `Request failed (${status})`;
+}
+
 async function api(path, options = {}) {
   let response;
   try {
@@ -53,19 +88,20 @@ async function api(path, options = {}) {
   } catch {
     throw new Error("Backend unreachable or request failed");
   }
-  if (!response.ok) {
-    let message = `Request failed (${response.status})`;
+  let body = null;
+  if (response.status !== 204) {
     try {
-      const body = await response.json();
-      if (typeof body.detail === "string") {
-        message = body.detail;
-      }
+      body = await response.json();
     } catch {
-      message = `Request failed (${response.status})`;
+      body = null;
     }
-    throw new Error(message);
   }
-  return response.json();
+  if (!response.ok) {
+    const error = new Error(errorMessage(body, response.status));
+    error.status = response.status;
+    throw error;
+  }
+  return body ?? {};
 }
 
 function sendJson(path, method, body) {
@@ -74,6 +110,18 @@ function sendJson(path, method, body) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+}
+
+function post(path) {
+  return api(path, { method: "POST" });
+}
+
+function remove(path) {
+  return api(path, { method: "DELETE" });
+}
+
+function enc(value) {
+  return encodeURIComponent(value);
 }
 
 function formatTime(seconds) {
@@ -86,13 +134,17 @@ function formatTime(seconds) {
 function parseDuration(text) {
   const value = text.trim();
   if (!value) {
-    return 0;
+    return null;
   }
   if (value.includes(":")) {
     const [min, sec] = value.split(":").map(Number);
-    return (min || 0) * 60 + (sec || 0);
+    return Math.max(0, (min || 0) * 60 + (sec || 0));
   }
-  return Math.floor(Number(value)) || 0;
+  return Math.max(0, Math.floor(Number(value)) || 0);
+}
+
+function pluralSongs(count) {
+  return `${count} ${count === 1 ? "song" : "songs"}`;
 }
 
 function make(tag, className, text) {
@@ -106,9 +158,160 @@ function make(tag, className, text) {
   return node;
 }
 
+function openDialog(dialog) {
+  return new Promise((resolve) => {
+    dialog.returnValue = "";
+    dialog.addEventListener("close", () => resolve(dialog.returnValue === "ok"), { once: true });
+    dialog.showModal();
+  });
+}
+
+async function askConfirm(text, okLabel) {
+  el.confirmText.textContent = text;
+  el.confirmOk.textContent = okLabel;
+  return openDialog(el.confirmDialog);
+}
+
+async function askName(title, value) {
+  el.nameDialogTitle.textContent = title;
+  el.nameForm.elements.name.value = value;
+  if (!(await openDialog(el.nameDialog))) {
+    return null;
+  }
+  return el.nameForm.elements.name.value.trim() || null;
+}
+
+async function askPlaylist() {
+  if (state.playlists.length === 0) {
+    showToast("Create a playlist first", true);
+    return null;
+  }
+  el.pickSelect.replaceChildren(
+    ...state.playlists.map((playlist) => {
+      const option = make("option", "", playlist.name);
+      option.value = playlist.id;
+      return option;
+    })
+  );
+  if (!(await openDialog(el.pickDialog))) {
+    return null;
+  }
+  return el.pickSelect.value;
+}
+
+async function askSong(title, submitLabel, song = null) {
+  const fields = el.songForm.elements;
+  el.songForm.reset();
+  el.songDialogTitle.textContent = title;
+  el.songDialogSubmit.textContent = submitLabel;
+  el.songForm.querySelectorAll(".song-extra").forEach((input) => {
+    input.hidden = song !== null;
+  });
+  if (song) {
+    fields.title.value = song.title;
+    fields.artist.value = song.artist;
+  }
+  if (!(await openDialog(el.songDialog))) {
+    return null;
+  }
+  const result = {
+    title: fields.title.value.trim(),
+    artist: fields.artist.value.trim(),
+  };
+  if (!result.title || !result.artist) {
+    showToast("Title and artist are required", true);
+    return null;
+  }
+  const album = fields.album.value.trim();
+  const duration = parseDuration(fields.duration.value);
+  if (!song && album) {
+    result.album = album;
+  }
+  if (!song && duration !== null) {
+    result.duration = duration;
+  }
+  return result;
+}
+
+async function loadQueueSeparately() {
+  const [queue, current, history] = await Promise.all([
+    api("/queue"),
+    api("/navigation/current"),
+    api("/history").catch(() => ({ songs: [] })),
+  ]);
+  state.queue = queue.songs ?? [];
+  state.current = current.song ?? null;
+  state.history = (history.songs ?? []).slice().reverse();
+}
+
+async function loadQueue() {
+  try {
+    const data = await api("/queue/combined");
+    state.history = data.history ?? [];
+    state.current = data.current ?? null;
+    state.queue = data.queue ?? [];
+  } catch {
+    await loadQueueSeparately();
+  }
+}
+
+async function loadPlaylists() {
+  if (!state.playlistsReady) {
+    return;
+  }
+  try {
+    const data = await api("/playlists");
+    state.playlists = data.playlists ?? [];
+  } catch (error) {
+    if (error.status === 404 || error.status === 405) {
+      state.playlistsReady = false;
+      state.playlists = [];
+      return;
+    }
+    throw error;
+  }
+}
+
+async function loadPlaylist() {
+  if (state.view !== "playlist") {
+    state.playlist = null;
+    return;
+  }
+  try {
+    state.playlist = await api(`/playlists/${enc(state.playlistId)}`);
+  } catch (error) {
+    if (error.status === 404) {
+      state.view = "queue";
+      state.playlistId = null;
+      state.playlist = null;
+      showToast("Playlist no longer exists", true);
+      return;
+    }
+    throw error;
+  }
+}
+
+async function refresh() {
+  await Promise.all([loadQueue(), loadPlaylists(), loadPlaylist()]);
+  render();
+}
+
+function queueRows() {
+  const rows = state.history.map((song) => ({ song, kind: "history" }));
+  if (state.current) {
+    rows.push({ song: state.current, kind: "current" });
+  }
+  state.queue.forEach((song) => rows.push({ song, kind: "queue" }));
+  return rows;
+}
+
+function playlistRows() {
+  const songs = state.playlist ? state.playlist.songs ?? [] : [];
+  return songs.map((song) => ({ song, kind: "playlist" }));
+}
+
 function visibleRows() {
-  const rows = state.current ? [{ song: state.current, playing: true }] : [];
-  state.queue.forEach((song) => rows.push({ song, playing: false }));
+  const rows = state.view === "playlist" ? playlistRows() : queueRows();
   const query = state.filter.trim().toLowerCase();
   if (!query) {
     return rows;
@@ -116,8 +319,36 @@ function visibleRows() {
   return rows.filter(({ song }) => `${song.title} ${song.artist}`.toLowerCase().includes(query));
 }
 
-function buildRow(song, playing, number) {
-  const row = make("tr", playing ? "playing" : "");
+function rowButton(action, symbol, label, song) {
+  const button = make("button", "row-btn", symbol);
+  button.dataset.action = action;
+  button.dataset.id = song.id;
+  button.title = label;
+  button.setAttribute("aria-label", `${label}: ${song.title}`);
+  return button;
+}
+
+function rowButtons(kind, song) {
+  if (kind === "history") {
+    return [rowButton("replay", "↺", "Play next", song)];
+  }
+  if (kind === "current") {
+    return [rowButton("remove", "✕", "Remove", song)];
+  }
+  if (kind === "queue") {
+    const buttons = [rowButton("edit", "✎", "Edit", song)];
+    if (state.playlistsReady) {
+      buttons.push(rowButton("add-to-playlist", "+", "Add to playlist", song));
+    }
+    buttons.push(rowButton("remove", "✕", "Remove", song));
+    return buttons;
+  }
+  return [rowButton("remove-from-playlist", "✕", "Remove from playlist", song)];
+}
+
+function buildRow({ song, kind }, number) {
+  const rowClass = kind === "current" ? "playing" : kind === "history" ? "played" : "";
+  const row = make("tr", rowClass);
   row.dataset.id = song.id;
 
   const info = make("div");
@@ -127,12 +358,10 @@ function buildRow(song, playing, number) {
   const songCell = make("td");
   songCell.append(songBox);
 
-  const remove = make("button", "row-delete", "✕");
-  remove.title = "Remove song";
-  remove.setAttribute("aria-label", `Remove ${song.title}`);
-  remove.dataset.id = song.id;
+  const actions = make("div", "row-actions");
+  actions.append(...rowButtons(kind, song));
   const timeBox = make("div", "time-cell");
-  timeBox.append(make("span", "", formatTime(song.duration)), remove);
+  timeBox.append(make("span", "", formatTime(song.duration)), actions);
   const timeCell = make("td");
   timeCell.append(timeBox);
 
@@ -140,10 +369,17 @@ function buildRow(song, playing, number) {
     make("td", "", String(number)),
     songCell,
     make("td", "hide-mobile", song.album || "—"),
-    make("td", "hide-mobile", "—"),
+    make("td", "hide-mobile", song.added_at || "—"),
     timeCell
   );
   return row;
+}
+
+function emptyMessage() {
+  if (state.filter.trim()) {
+    return "No songs match your search";
+  }
+  return state.view === "playlist" ? "This playlist is empty" : "Queue is empty";
 }
 
 function renderTable() {
@@ -151,14 +387,14 @@ function renderTable() {
   el.tracksBody.replaceChildren();
   if (rows.length === 0) {
     const row = make("tr");
-    const cell = make("td", "empty", state.filter ? "No songs match your search" : "Queue is empty");
+    const cell = make("td", "empty", emptyMessage());
     cell.colSpan = 5;
     row.append(cell);
     el.tracksBody.append(row);
     return;
   }
-  rows.forEach(({ song, playing }, index) => {
-    el.tracksBody.append(buildRow(song, playing, index + 1));
+  rows.forEach((item, index) => {
+    el.tracksBody.append(buildRow(item, index + 1));
   });
 }
 
@@ -178,41 +414,58 @@ function renderPlayer() {
   el.queueArtist.textContent = next ? next.artist : "—";
 }
 
-function renderCounts() {
-  const total = state.queue.length + (state.current ? 1 : 0);
-  const label = `${total} ${total === 1 ? "song" : "songs"}`;
-  el.libraryCount.textContent = label;
-  el.heroCount.textContent = label;
+function upcomingCount() {
+  return state.queue.length + (state.current ? 1 : 0);
+}
+
+function renderHero() {
+  const inPlaylist = state.view === "playlist" && state.playlist;
+  el.heroType.textContent = inPlaylist ? "Playlist" : "Queue";
+  el.heroTitle.textContent = inPlaylist ? state.playlist.name : "Queue";
+  el.heroCount.textContent = pluralSongs(inPlaylist ? (state.playlist.songs ?? []).length : upcomingCount());
+  el.clear.hidden = Boolean(inPlaylist);
+  el.rename.hidden = !inPlaylist;
+  el.deletePlaylist.hidden = !inPlaylist;
+}
+
+function buildPlaylistItem(playlist) {
+  const active = state.view === "playlist" && state.playlistId === playlist.id;
+  const item = make("button", active ? "playlist active" : "playlist");
+  item.dataset.playlistId = playlist.id;
+  const info = make("div");
+  info.append(
+    make("p", "title", playlist.name),
+    make("p", "subtitle", `Playlist • ${pluralSongs(playlist.songsCount ?? 0)}`)
+  );
+  item.append(make("div", "no-cover"), info);
+  return item;
+}
+
+function renderLibrary() {
+  el.libQueue.classList.toggle("active", state.view === "queue");
+  el.libQueueCount.textContent = pluralSongs(upcomingCount());
+  el.libPlaylists.replaceChildren(...state.playlists.map(buildPlaylistItem));
+  el.libNote.hidden = state.playlistsReady;
+  el.newPlaylist.hidden = !state.playlistsReady;
 }
 
 function render() {
   renderTable();
   renderPlayer();
-  renderCounts();
+  renderHero();
+  renderLibrary();
 }
 
-async function refresh() {
-  const [list, current] = await Promise.all([api("/queue"), api("/navigation/current")]);
-  state.queue = list.songs;
-  state.current = current.song;
-  render();
-}
-
-async function init() {
-  try {
+async function boot() {
+  await refresh();
+  if (!state.current && state.queue.length === 0 && state.history.length === 0) {
+    await sendJson("/queue/setup", "POST", DEMO_SONGS);
     await refresh();
-    if (state.queue.length === 0 && !state.current) {
-      await sendJson("/queue/setup", "POST", DEMO_SONGS);
-      await refresh();
-    }
-  } catch (error) {
-    render();
-    showToast(error.message, true);
   }
 }
 
 async function goNext() {
-  const data = await api("/navigation/next", { method: "POST" });
+  const data = await post("/navigation/next");
   if (data.message) {
     showToast(data.message);
   }
@@ -220,60 +473,184 @@ async function goNext() {
 }
 
 async function goPrev() {
-  const data = await api("/navigation/prev", { method: "POST" });
+  const data = await post("/navigation/prev");
   if (data.message) {
     showToast(data.message);
   }
   await refresh();
 }
 
-async function shuffle() {
-  await api("/navigation/shuffle", { method: "POST" });
+async function shuffleQueue() {
+  await post("/navigation/shuffle");
   await refresh();
   showToast("Queue shuffled");
 }
 
-async function play() {
-  if (!state.current) {
-    await goNext();
+async function playPlaylist(shuffled) {
+  const name = state.playlist.name;
+  await post(`/playlists/${enc(state.playlistId)}/play`);
+  if (shuffled) {
+    await post("/navigation/shuffle");
   }
+  await post("/navigation/next");
+  state.view = "queue";
+  state.playlistId = null;
+  await refresh();
+  showToast(`Playing ${name}`);
 }
 
-async function removeSong(id) {
-  if (state.current && state.current.id === id) {
-    await api("/navigation/current", { method: "DELETE" });
+async function playMain() {
+  if (state.view === "playlist" && state.playlist) {
+    await playPlaylist(false);
+    return;
+  }
+  if (state.current) {
+    showToast(`Playing ${state.current.title}`);
+    return;
+  }
+  await goNext();
+}
+
+async function shuffleMain() {
+  if (state.view === "playlist" && state.playlist) {
+    await playPlaylist(true);
+    return;
+  }
+  await shuffleQueue();
+}
+
+async function addSong() {
+  const inPlaylist = state.view === "playlist" && state.playlist;
+  const song = await askSong(inPlaylist ? `Add to ${state.playlist.name}` : "Add to queue", "Add");
+  if (!song) {
+    return;
+  }
+  if (inPlaylist) {
+    await sendJson(`/playlists/${enc(state.playlistId)}/songs`, "POST", song);
   } else {
-    await api(`/editing/remove/${encodeURIComponent(id)}`, { method: "DELETE" });
+    await sendJson("/editing/append", "POST", song);
+  }
+  await refresh();
+  showToast("Song added");
+}
+
+async function editSong(songId) {
+  const song = state.queue.find((item) => item.id === songId);
+  if (!song) {
+    return;
+  }
+  const changes = await askSong("Edit song", "Save", song);
+  if (!changes) {
+    return;
+  }
+  if (changes.title !== song.title) {
+    await sendJson(`/editing/update-title/${enc(songId)}`, "PATCH", { new_title: changes.title });
+  }
+  if (changes.artist !== song.artist) {
+    await sendJson(`/editing/update-artist/${enc(songId)}`, "PATCH", { new_artist: changes.artist });
+  }
+  await refresh();
+  showToast("Song updated");
+}
+
+async function removeSong(songId) {
+  if (state.current && state.current.id === songId) {
+    await remove("/navigation/current");
+  } else {
+    await remove(`/editing/remove/${enc(songId)}`);
   }
   await refresh();
   showToast("Song removed");
 }
 
-async function addSong() {
-  const form = new FormData(el.addForm);
-  const title = String(form.get("title")).trim();
-  const artist = String(form.get("artist")).trim();
-  if (!title || !artist) {
-    showToast("Title and artist are required", true);
+async function replaySong(songId) {
+  await post(`/history/${enc(songId)}/replay`);
+  await refresh();
+  showToast("Plays next");
+}
+
+async function addToPlaylist(songId) {
+  const playlistId = await askPlaylist();
+  if (!playlistId) {
     return;
   }
-  const song = {
-    title,
-    artist,
-    album: String(form.get("album")).trim(),
-    duration: parseDuration(String(form.get("duration"))),
-  };
-  const last = state.queue[state.queue.length - 1];
-  if (last) {
-    await sendJson("/editing/insert-after", "POST", { new_song: song, selected_song_id: last.id });
-  } else {
-    await sendJson("/editing/append", "POST", song);
-  }
-  el.addForm.reset();
-  el.addDialog.close();
+  await sendJson(`/playlists/${enc(playlistId)}/songs`, "POST", { song_id: songId });
   await refresh();
-  showToast("Song added");
+  const playlist = state.playlists.find((item) => item.id === playlistId);
+  showToast(`Added to ${playlist ? playlist.name : "playlist"}`);
 }
+
+async function removeFromPlaylist(songId) {
+  await remove(`/playlists/${enc(state.playlistId)}/songs/${enc(songId)}`);
+  await refresh();
+  showToast("Removed from playlist");
+}
+
+async function clearQueue() {
+  const ok = await askConfirm("This removes the queue, the history and the current song.", "Clear");
+  if (!ok) {
+    return;
+  }
+  await remove("/editing/remove-all");
+  await refresh();
+  showToast("Queue cleared");
+}
+
+async function openQueue() {
+  state.view = "queue";
+  state.playlistId = null;
+  await refresh();
+}
+
+async function openPlaylist(playlistId) {
+  state.view = "playlist";
+  state.playlistId = playlistId;
+  await refresh();
+}
+
+async function createPlaylist() {
+  const name = await askName("New playlist", "");
+  if (!name) {
+    return;
+  }
+  const created = await sendJson("/playlists", "POST", { name });
+  if (created.id) {
+    await openPlaylist(created.id);
+  } else {
+    await refresh();
+  }
+  showToast(`Created ${name}`);
+}
+
+async function renamePlaylist() {
+  const name = await askName("Rename playlist", state.playlist.name);
+  if (!name || name === state.playlist.name) {
+    return;
+  }
+  await sendJson(`/playlists/${enc(state.playlistId)}`, "PATCH", { name });
+  await refresh();
+  showToast("Playlist renamed");
+}
+
+async function deletePlaylist() {
+  const ok = await askConfirm(`Delete "${state.playlist.name}"? The songs stay in other playlists.`, "Delete");
+  if (!ok) {
+    return;
+  }
+  await remove(`/playlists/${enc(state.playlistId)}`);
+  state.view = "queue";
+  state.playlistId = null;
+  await refresh();
+  showToast("Playlist deleted");
+}
+
+const rowActions = {
+  replay: replaySong,
+  edit: editSong,
+  remove: removeSong,
+  "add-to-playlist": addToPlaylist,
+  "remove-from-playlist": removeFromPlaylist,
+};
 
 let busy = false;
 
@@ -286,22 +663,44 @@ async function safely(task) {
     await task();
   } catch (error) {
     showToast(error.message, true);
+    if (error.status === 404 || error.status === 409) {
+      await refresh().catch(() => render());
+    }
   } finally {
     busy = false;
   }
 }
 
-document.querySelector("#btn-next").addEventListener("click", () => safely(goNext));
-document.querySelector("#btn-prev").addEventListener("click", () => safely(goPrev));
-document.querySelector("#btn-play").addEventListener("click", () => safely(play));
-document.querySelector("#btn-play-big").addEventListener("click", () => safely(play));
-document.querySelector("#btn-shuffle").addEventListener("click", () => safely(shuffle));
-document.querySelector("#btn-shuffle-big").addEventListener("click", () => safely(shuffle));
-document.querySelector("#btn-add").addEventListener("click", () => el.addDialog.showModal());
-document.querySelector("#add-cancel").addEventListener("click", () => el.addDialog.close());
-el.addForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  safely(addSong);
+function onClick(selector, task) {
+  document.querySelector(selector).addEventListener("click", () => safely(task));
+}
+
+onClick("#btn-next", goNext);
+onClick("#btn-prev", goPrev);
+onClick("#btn-play", playMain);
+onClick("#btn-play-big", playMain);
+onClick("#btn-shuffle", shuffleQueue);
+onClick("#btn-shuffle-big", shuffleMain);
+onClick("#btn-add-song", addSong);
+onClick("#btn-new-playlist", createPlaylist);
+onClick("#btn-clear", clearQueue);
+onClick("#btn-rename", renamePlaylist);
+onClick("#btn-delete-playlist", deletePlaylist);
+onClick("#btn-home", openQueue);
+onClick("#lib-queue", openQueue);
+
+el.libPlaylists.addEventListener("click", (event) => {
+  const item = event.target.closest("[data-playlist-id]");
+  if (item) {
+    safely(() => openPlaylist(item.dataset.playlistId));
+  }
+});
+
+el.tracksBody.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-action]");
+  if (button && rowActions[button.dataset.action]) {
+    safely(() => rowActions[button.dataset.action](button.dataset.id));
+  }
 });
 
 el.search.addEventListener("input", (event) => {
@@ -309,11 +708,11 @@ el.search.addEventListener("input", (event) => {
   renderTable();
 });
 
-el.tracksBody.addEventListener("click", (event) => {
-  const button = event.target.closest(".row-delete");
-  if (button) {
-    safely(() => removeSong(button.dataset.id));
+safely(async () => {
+  try {
+    await boot();
+  } catch (error) {
+    render();
+    throw error;
   }
 });
-
-init();

@@ -216,7 +216,7 @@ h3 {
   font-size: 14px;
 }
 
-.queue {
+.playlist {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -225,18 +225,18 @@ h3 {
   cursor: pointer;
 }
 
-.queue:hover,
-.queue.active {
+.playlist:hover,
+.playlist.active {
   background: var(--hover);
 }
 
-.queue > img {
+.playlist > img {
   width: 48px;
   height: 48px;
   border-radius: 4px;
 }
 
-.queue .subtitle {
+.playlist .subtitle {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -370,7 +370,7 @@ h3 {
 }
 
 .tracks th:last-child {
-  width: 120px;
+  width: 150px;
 }
 
 .tracks td {
@@ -596,9 +596,55 @@ h3 {
   filter: invert(100%);
 }
 
+[hidden] {
+  display: none !important;
+}
+
+button.playlist {
+  width: 100%;
+  text-align: left;
+}
+
+.playlist > div {
+  min-width: 0;
+}
+
+.playlist .no-cover {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.lib-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lib-note {
+  padding: 8px;
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.view-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .tracks td.empty {
   height: 80px;
   text-align: center;
+}
+
+.tracks tbody tr.played td {
+  opacity: 0.5;
+}
+
+.tracks tbody tr.played:hover td {
+  opacity: 0.8;
 }
 
 .time-cell {
@@ -608,7 +654,12 @@ h3 {
   gap: 8px;
 }
 
-.row-delete {
+.row-actions {
+  display: flex;
+  gap: 2px;
+}
+
+.row-btn {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -616,14 +667,20 @@ h3 {
   opacity: 0;
 }
 
-.tracks tbody tr:hover .row-delete,
-.row-delete:focus-visible {
+.tracks tbody tr:hover .row-btn,
+.row-btn:focus-visible {
   opacity: 1;
 }
 
-.row-delete:hover {
+.row-btn:hover {
   color: #fff;
   background: #2a2a2a;
+}
+
+@media (hover: none) {
+  .row-btn {
+    opacity: 1;
+  }
 }
 
 .toast {
@@ -645,13 +702,9 @@ h3 {
   color: #fff;
 }
 
-.toast[hidden] {
-  display: none;
-}
-
-#add-dialog {
+.modal {
   margin: auto;
-  width: 340px;
+  width: min(340px, calc(100% - 32px));
   padding: 24px;
   border: none;
   border-radius: 8px;
@@ -659,17 +712,23 @@ h3 {
   color: #fff;
 }
 
-#add-dialog::backdrop {
+.modal::backdrop {
   background: rgba(0, 0, 0, 0.7);
 }
 
-#add-form {
+.modal form {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-#add-form input {
+.modal p {
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.modal input,
+.modal select {
   padding: 10px 12px;
   border: none;
   border-radius: 4px;
@@ -679,8 +738,13 @@ h3 {
   font-size: 14px;
 }
 
-#add-form input:focus {
+.modal input:focus,
+.modal select:focus {
   outline: 2px solid #fff;
+}
+
+.modal input:user-invalid {
+  outline: 2px solid #e22134;
 }
 
 .dialog-buttons {
@@ -696,4 +760,9 @@ h3 {
   background: var(--green);
   color: #000;
   font-weight: bold;
+}
+
+.dialog-submit.danger {
+  background: #e22134;
+  color: #fff;
 }

@@ -13,7 +13,7 @@
         <img src="images/spotify-brands-solid-full.svg" alt="Spotify" />
       </div>
       <div class="search-wrap">
-        <button class="round-btn">
+        <button class="round-btn" id="btn-home" title="Queue">
           <img src="images/home.svg" alt="home" />
         </button>
         <div class="search">
@@ -30,12 +30,12 @@
       <div class="row">
         <h2>Your Library</h2>
         <div class="group">
-          <button class="icon" id="btn-add" title="Add song"><img src="images/circle-plus-solid-full.svg" alt="create" /></button>
+          <button class="icon" id="btn-new-playlist" title="New playlist"><img src="images/circle-plus-solid-full.svg" alt="new playlist" /></button>
           <button class="icon"><img src="images/expand-solid-full.svg" alt="expand" /></button>
         </div>
       </div>
 
-      <button class="chip">Queue</button>
+      <button class="chip">Playlists</button>
 
       <div class="row">
         <button class="icon"><img src="images/magnifying-glass-solid-full.svg" alt="search" /></button>
@@ -45,24 +45,28 @@
         </button>
       </div>
 
-      <div class="queue active">
-        <img src="images/liked.png" alt="Liked Songs" />
-        <div>
-          <p class="title">Liked Songs</p>
-          <p class="subtitle">
-            <img class="pin" src="images/thumbtack-solid-full.svg" alt="pinned" />
-            Queue • <span id="queue-music-count">0 songs</span>
-          </p>
-        </div>
+      <div class="lib-list">
+        <button class="playlist active" id="lib-queue">
+          <img src="images/liked.png" alt="" />
+          <div>
+            <p class="title">Queue</p>
+            <p class="subtitle">
+              <img class="pin" src="images/thumbtack-solid-full.svg" alt="pinned" />
+              <span id="lib-queue-count">0 songs</span>
+            </p>
+          </div>
+        </button>
+        <div class="lib-list" id="lib-playlists"></div>
+        <p class="lib-note" id="lib-note" hidden>Playlists are not available on the backend yet.</p>
       </div>
     </aside>
 
     <main class="content">
       <section class="hero">
-        <img src="images/liked.png" alt="Liked Songs" />
+        <img src="images/liked.png" alt="" />
         <div>
-          <p>Queue</p>
-          <h1>Liked Songs</h1>
+          <p id="hero-type">Queue</p>
+          <h1 id="hero-title">Queue</h1>
           <p class="hero-info">
             <img src="images/person.webp" alt="" />
             <b>User</b> • <span id="hero-count">0 songs</span>
@@ -72,14 +76,15 @@
 
       <section class="actions">
         <div>
-          <button class="play-big" id="btn-play-big"><img src="images/play.svg" alt="play" /></button>
-          <button class="icon big" id="btn-shuffle-big"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
-          <button class="icon big"><img src="images/download.svg" alt="download" /></button>
+          <button class="play-big" id="btn-play-big" title="Play"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon big" id="btn-shuffle-big" title="Shuffle"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="icon big" id="btn-add-song" title="Add song"><img src="images/circle-plus-solid-full.svg" alt="add song" /></button>
         </div>
-        <button class="text-btn">
-          List
-          <img src="images/list-solid-full.svg" alt="" />
-        </button>
+        <div class="view-actions">
+          <button class="text-btn" id="btn-clear">Clear queue</button>
+          <button class="text-btn" id="btn-rename" hidden>Rename</button>
+          <button class="text-btn" id="btn-delete-playlist" hidden>Delete playlist</button>
+        </div>
       </section>
 
       <table class="tracks">
@@ -144,10 +149,10 @@
 
       <div class="controls">
         <div class="buttons">
-          <button class="icon" id="btn-shuffle"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
-          <button class="icon" id="btn-prev"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
-          <button class="play-small" id="btn-play"><img src="images/play.svg" alt="play" /></button>
-          <button class="icon" id="btn-next"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
+          <button class="icon" id="btn-shuffle" title="Shuffle queue"><img src="images/shuffle-solid-full.svg" alt="shuffle" /></button>
+          <button class="icon" id="btn-prev" title="Previous"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
+          <button class="play-small" id="btn-play" title="Play"><img src="images/play.svg" alt="play" /></button>
+          <button class="icon" id="btn-next" title="Next"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
           <button class="icon"><img src="images/repeat-solid-full.svg" alt="repeat" /></button>
         </div>
         <div class="progress">
@@ -167,16 +172,49 @@
       </div>
     </footer>
 
-    <dialog id="add-dialog">
-      <form id="add-form">
-        <h3>Add song</h3>
-        <input name="title" type="text" placeholder="Title" required />
-        <input name="artist" type="text" placeholder="Artist" required />
-        <input name="album" type="text" placeholder="Album (optional)" />
-        <input name="duration" type="text" placeholder="Length, e.g. 3:45 (optional)" />
+    <dialog class="modal" id="song-dialog">
+      <form method="dialog" id="song-form">
+        <h3 id="song-dialog-title">Add song</h3>
+        <input name="title" type="text" placeholder="Title" maxlength="30" required />
+        <input name="artist" type="text" placeholder="Artist" maxlength="30" required />
+        <input class="song-extra" name="album" type="text" placeholder="Album (optional)" maxlength="30" />
+        <input class="song-extra" name="duration" type="text" placeholder="Length, e.g. 3:45 (optional)" pattern="\d+(:[0-5]\d)?" title="Minutes:seconds, e.g. 3:45" />
         <div class="dialog-buttons">
-          <button type="button" id="add-cancel" class="text-btn">Cancel</button>
-          <button type="submit" class="dialog-submit">Add</button>
+          <button value="cancel" formnovalidate class="text-btn">Cancel</button>
+          <button value="ok" class="dialog-submit" id="song-dialog-submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="name-dialog">
+      <form method="dialog" id="name-form">
+        <h3 id="name-dialog-title">New playlist</h3>
+        <input name="name" type="text" placeholder="Playlist name" maxlength="50" required />
+        <div class="dialog-buttons">
+          <button value="cancel" formnovalidate class="text-btn">Cancel</button>
+          <button value="ok" class="dialog-submit">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="pick-dialog">
+      <form method="dialog">
+        <h3>Add to playlist</h3>
+        <select id="pick-select" aria-label="Playlist"></select>
+        <div class="dialog-buttons">
+          <button value="cancel" formnovalidate class="text-btn">Cancel</button>
+          <button value="ok" class="dialog-submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="confirm-dialog">
+      <form method="dialog">
+        <h3>Are you sure?</h3>
+        <p id="confirm-text"></p>
+        <div class="dialog-buttons">
+          <button value="cancel" class="text-btn">Cancel</button>
+          <button value="ok" class="dialog-submit danger" id="confirm-ok">Confirm</button>
         </div>
       </form>
     </dialog>
