@@ -9,6 +9,38 @@ const DEMO_SONGS = {
   },
 };
 
+const DEMO_PLAYLISTS = [
+  {
+    name: "Polskie klasyki",
+    songs: [
+      { title: "Jolka, Jolka", artist: "Budka Suflera", duration: 318, album: "Za ostatni grosz" },
+      { title: "Autobiografia", artist: "Perfect", duration: 287, album: "Unu" },
+      { title: "Dziwny jest ten świat", artist: "Czesław Niemen", duration: 250 },
+      { title: "Wehikuł czasu", artist: "Dżem", duration: 343 },
+    ],
+  },
+  {
+    name: "90s Eurodance",
+    songs: [
+      { title: "What Is Love", artist: "Haddaway", duration: 270 },
+      { title: "Blue (Da Ba Dee)", artist: "Eiffel 65", duration: 283 },
+      { title: "Rhythm Is a Dancer", artist: "Snap!", duration: 332 },
+      { title: "Barbie Girl", artist: "Aqua", duration: 197 },
+    ],
+  },
+  {
+    name: "Rock Classics",
+    songs: [
+      { title: "Bohemian Rhapsody", artist: "Queen", duration: 354 },
+      { title: "Hotel California", artist: "Eagles", duration: 391 },
+      { title: "Stairway to Heaven", artist: "Led Zeppelin", duration: 482 },
+      { title: "Smells Like Teen Spirit", artist: "Nirvana", duration: 301 },
+    ],
+  },
+];
+
+const SEEDED_KEY = "spotify-clone-demo-playlists";
+
 const state = {
   view: "queue",
   history: [],
@@ -104,6 +136,17 @@ async function api(path, options = {}) {
   return body ?? {};
 }
 
+async function onConflict(request, message) {
+  try {
+    return await request;
+  } catch (error) {
+    if (error.status === 409) {
+      error.message = message;
+    }
+    throw error;
+  }
+}
+
 function sendJson(path, method, body) {
   return api(path, {
     method,
@@ -182,12 +225,13 @@ async function askName(title, value) {
 }
 
 async function askPlaylist() {
-  if (state.playlists.length === 0) {
-    showToast("Create a playlist first", true);
+  const choices = state.playlists.filter((playlist) => playlist.id !== state.playlistId);
+  if (choices.length === 0) {
+    showToast(state.playlists.length ? "No other playlist to add to" : "Create a playlist first", true);
     return null;
   }
   el.pickSelect.replaceChildren(
-    ...state.playlists.map((playlist) => {
+    ...choices.map((playlist) => {
       const option = make("option", "", playlist.name);
       option.value = playlist.id;
       return option;
@@ -256,12 +300,10 @@ async function loadQueue() {
 }
 
 async function loadPlaylists() {
-  if (!state.playlistsReady) {
-    return;
-  }
   try {
     const data = await api("/playlists");
-    state.playlists = data.playlists ?? [];
+    state.playlists = (data.playlists ?? []).slice().sort((a, b) => a.name.localeCompare(b.name));
+    state.playlistsReady = true;
   } catch (error) {
     if (error.status === 404 || error.status === 405) {
       state.playlistsReady = false;
@@ -329,21 +371,23 @@ function rowButton(action, symbol, label, song) {
 }
 
 function rowButtons(kind, song) {
+  const buttons = [];
   if (kind === "history") {
-    return [rowButton("replay", "↺", "Play next", song)];
-  }
-  if (kind === "current") {
-    return [rowButton("remove", "✕", "Remove", song)];
+    buttons.push(rowButton("replay", "↺", "Play next", song));
   }
   if (kind === "queue") {
-    const buttons = [rowButton("edit", "✎", "Edit", song)];
-    if (state.playlistsReady) {
-      buttons.push(rowButton("add-to-playlist", "+", "Add to playlist", song));
-    }
-    buttons.push(rowButton("remove", "✕", "Remove", song));
-    return buttons;
+    buttons.push(rowButton("edit", "✎", "Edit", song));
   }
-  return [rowButton("remove-from-playlist", "✕", "Remove from playlist", song)];
+  if (state.playlistsReady) {
+    buttons.push(rowButton("add-to-playlist", "+", "Add to playlist", song));
+  }
+  if (kind === "current" || kind === "queue") {
+    buttons.push(rowButton("remove", "✕", "Remove", song));
+  }
+  if (kind === "playlist") {
+    buttons.push(rowButton("remove-from-playlist", "✕", "Remove from playlist", song));
+  }
+  return buttons;
 }
 
 function buildRow({ song, kind }, number) {
@@ -456,10 +500,44 @@ function render() {
   renderLibrary();
 }
 
+function wasSeeded() {
+  try {
+    return localStorage.getItem(SEEDED_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
+function markSeeded() {
+  try {
+    localStorage.setItem(SEEDED_KEY, "yes");
+  } catch {
+    return;
+  }
+}
+
+async function seedPlaylists() {
+  for (const playlist of DEMO_PLAYLISTS) {
+    const created = await sendJson("/playlists", "POST", { name: playlist.name });
+    for (const song of playlist.songs) {
+      await sendJson(`/playlists/${enc(created.id)}/songs`, "POST", song);
+    }
+  }
+}
+
 async function boot() {
   await refresh();
+  let changed = false;
+  if (state.playlistsReady && state.playlists.length === 0 && !wasSeeded()) {
+    markSeeded();
+    await seedPlaylists();
+    changed = true;
+  }
   if (!state.current && state.queue.length === 0 && state.history.length === 0) {
     await sendJson("/queue/setup", "POST", DEMO_SONGS);
+    changed = true;
+  }
+  if (changed) {
     await refresh();
   }
 }
@@ -488,6 +566,10 @@ async function shuffleQueue() {
 
 async function playPlaylist(shuffled) {
   const name = state.playlist.name;
+  if ((state.playlist.songs ?? []).length === 0) {
+    showToast(`${name} is empty`, true);
+    return;
+  }
   await post(`/playlists/${enc(state.playlistId)}/play`);
   if (shuffled) {
     await post("/navigation/shuffle");
@@ -526,7 +608,10 @@ async function addSong() {
     return;
   }
   if (inPlaylist) {
-    await sendJson(`/playlists/${enc(state.playlistId)}/songs`, "POST", song);
+    await onConflict(
+      sendJson(`/playlists/${enc(state.playlistId)}/songs`, "POST", song),
+      "This song is already in the playlist"
+    );
   } else {
     await sendJson("/editing/append", "POST", song);
   }
@@ -574,10 +659,14 @@ async function addToPlaylist(songId) {
   if (!playlistId) {
     return;
   }
-  await sendJson(`/playlists/${enc(playlistId)}/songs`, "POST", { song_id: songId });
-  await refresh();
   const playlist = state.playlists.find((item) => item.id === playlistId);
-  showToast(`Added to ${playlist ? playlist.name : "playlist"}`);
+  const name = playlist ? playlist.name : "the playlist";
+  await onConflict(
+    sendJson(`/playlists/${enc(playlistId)}/songs`, "POST", { song_id: songId }),
+    `This song is already in ${name}`
+  );
+  await refresh();
+  showToast(`Added to ${name}`);
 }
 
 async function removeFromPlaylist(songId) {
@@ -596,13 +685,20 @@ async function clearQueue() {
   showToast("Queue cleared");
 }
 
+function clearFilter() {
+  state.filter = "";
+  el.search.value = "";
+}
+
 async function openQueue() {
+  clearFilter();
   state.view = "queue";
   state.playlistId = null;
   await refresh();
 }
 
 async function openPlaylist(playlistId) {
+  clearFilter();
   state.view = "playlist";
   state.playlistId = playlistId;
   await refresh();
@@ -613,7 +709,10 @@ async function createPlaylist() {
   if (!name) {
     return;
   }
-  const created = await sendJson("/playlists", "POST", { name });
+  const created = await onConflict(
+    sendJson("/playlists", "POST", { name }),
+    `A playlist named "${name}" already exists`
+  );
   if (created.id) {
     await openPlaylist(created.id);
   } else {
@@ -627,7 +726,10 @@ async function renamePlaylist() {
   if (!name || name === state.playlist.name) {
     return;
   }
-  await sendJson(`/playlists/${enc(state.playlistId)}`, "PATCH", { name });
+  await onConflict(
+    sendJson(`/playlists/${enc(state.playlistId)}`, "PATCH", { name }),
+    `A playlist named "${name}" already exists`
+  );
   await refresh();
   showToast("Playlist renamed");
 }

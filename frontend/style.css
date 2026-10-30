@@ -766,3 +766,86 @@ button.playlist {
   background: #e22134;
   color: #fff;
 }
+
+@media (max-width: 800px) {
+  body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 64px auto minmax(0, 1fr) 72px;
+    grid-template-areas:
+      "top"
+      "library"
+      "content"
+      "player";
+  }
+
+  .library {
+    display: block;
+    padding: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .library > .row,
+  .library > .chip,
+  .lib-note {
+    display: none;
+  }
+
+  .library .lib-list {
+    flex-direction: row;
+  }
+
+  .library button.playlist {
+    width: auto;
+    max-width: 200px;
+    flex-shrink: 0;
+  }
+
+  .library .playlist > img,
+  .library .playlist .no-cover {
+    width: 36px;
+    height: 36px;
+  }
+
+  .topbar,
+  .search-wrap,
+  .search {
+    min-width: 0;
+  }
+
+  .topbar {
+    gap: 8px;
+  }
+
+  .actions {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .view-actions {
+    gap: 12px;
+  }
+
+  .tracks {
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+  }
+
+  .tracks th:first-child {
+    width: 36px;
+  }
+
+  .tracks th:last-child {
+    width: 112px;
+  }
+
+  .tracks th,
+  .tracks td {
+    padding: 0 6px;
+  }
+
+  .player {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
