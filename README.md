@@ -20,12 +20,13 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 Every request with a body needs the `Content-Type: application/json` header, otherwise FastAPI answers 422.
 Song body (`SongDTO`): `{"title": "...", "artist": "...", "duration": 180, "album": "..."}` — `duration` and `album` are optional.
 Unknown song IDs return **404**.
-The queue is saved to `backend/playlist.db` (SQLite) and loaded on startup; history and the current song live only in memory.
+The queue, history and current song live **only in memory** (gone after a restart). `backend/playlist.db` (SQLite) stores only songs and named playlists; an old-format `playlist.db` is cleaned up automatically on startup.
 
 | Method | Path | Body / notes |
 |---|---|---|
 | `POST` | `/queue/setup` | `{"songs": {"1": SongDTO, ...}}` — **replaces everything**: queue, history and current song. `{}` = empty queue. |
 | `GET` | `/queue` | the queue |
+| `GET` | `/queue/combined` | `{"history": [...], "current": Song \| null, "queue": [...]}` — everything for the main view in one call (history oldest first) |
 | `POST` | `/editing/append` | `SongDTO` — add at the end of the queue |
 | `POST` | `/editing/prepend` | `SongDTO` — add at the start of the queue (plays next) |
 | `POST` | `/editing/insert-after` / `/insert-before` | `{"new_song": SongDTO, "selected_song_id": "..."}` — next to a song in the queue |
@@ -46,11 +47,6 @@ The queue is saved to `backend/playlist.db` (SQLite) and loaded on startup; hist
 | `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
 | `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
 
-## To-do
-
-### Backend
-- [ ] **B9.** Combined view endpoint — one response with both the queue and the history, so the frontend can render its main view in a single call, e.g. `GET /queue/view` → `{"songs": [...], "history": [...], "current": Song | null}`.
-
 ## Named playlists
 
 Playlists are saved, named lists of songs. They are **not** the queue: playing a song pops it from the queue into history,
@@ -58,32 +54,8 @@ a playlist must not lose songs that way. "Play playlist X" copies its songs into
 so navigation, history and shuffle keep working unchanged — shuffling the queue doesn't touch the saved playlist.
 One song can be in many playlists (many-to-many); editing a song's title/artist changes it everywhere.
 
-Order: **P1 → P2** first (P3 can start in parallel once the method names below are agreed), P4 after P3.
-
-### P1 — database (`db.py`)
-- [ ] Turn on foreign keys in `_connect()`: `conn.execute("PRAGMA foreign_keys = ON")` (SQLite has them off by default, `ON DELETE CASCADE` won't work otherwise).
-- [ ] New schema in `init_db()` — songs exist once, playlists reference them:
-  ```sql
-  CREATE TABLE songs (
-      id TEXT PRIMARY KEY, title TEXT NOT NULL, artist TEXT NOT NULL,
-      duration INTEGER NOT NULL, album TEXT NOT NULL,
-      play_count INTEGER NOT NULL, added_at TEXT NOT NULL
-  );
-  CREATE TABLE playlists (
-      id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL
-  );
-  CREATE TABLE playlist_songs (
-      playlist_id TEXT NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
-      song_id     TEXT NOT NULL REFERENCES songs(id)     ON DELETE CASCADE,
-      position    INTEGER NOT NULL,
-      PRIMARY KEY (playlist_id, song_id)   -- a song at most once per playlist
-  );
-  CREATE TABLE queue_songs (
-      song_id  TEXT NOT NULL REFERENCES songs(id) ON DELETE CASCADE,
-      position INTEGER PRIMARY KEY
-  );
-  ```
-- [ ] Move the queue persistence (`save_queue`/`load_queue`) to `songs` + `queue_songs`. Everyone deletes their local `backend/playlist.db` once after this lands (the old `songs` table has a `position` column).
+The database is ready (`db.py`: `songs`, `playlists`, `playlist_songs`, foreign keys on). The queue is never stored. Order: **P2** first (P3 can start in parallel once the method names below are agreed), P4 after P3.
+In `db.py` reuse `_connect()` (turns on foreign keys, commits/rolls back, closes), `row_to_song`/`song_to_row` and `upsert_songs`.
 
 ### P2 — repository (new `repositories/playlist_repository.py`)
 Agree on these names first so P3 can start:
@@ -108,7 +80,7 @@ class PlaylistRepository:
 | `GET` | `/playlists/{id}` | `{"id", "name", "songs": [...]}`, 404 if missing |
 | `PATCH` | `/playlists/{id}` | `{"name": "..."}` — rename, 409 on duplicate |
 | `DELETE` | `/playlists/{id}` | delete the playlist (its songs stay in `songs`) |
-| `POST` | `/playlists/{id}/songs` | `SongDTO` → new song, or `{"song_id": "..."}` → add an existing song (e.g. from the queue); 409 if already there |
+| `POST` | `/playlists/{id}/songs` | `SongDTO` → new song, or `{"song_id": "..."}` → add a song from the queue (the service finds it in `queue` and upserts it into `songs`); 409 if already there |
 | `DELETE` | `/playlists/{id}/songs/{song_id}` | remove the song from this playlist only |
 | `POST` | `/playlists/{id}/play` | load the playlist into the queue — same as `/queue/setup` (clears queue, history, current song) |
 - [ ] Service raises `LookupError` for unknown ids (already mapped to 404 in `main.py`); add a similar handler for "name taken" → 409.
