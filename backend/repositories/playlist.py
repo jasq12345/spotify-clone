@@ -87,3 +87,7 @@ class PlaylistRepository:
                 "DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?",
                 (playlist_id, song_id),
             )
+
+    def update_song(self, song: Song) -> None:
+        with db._connect() as conn:
+            db.upsert_songs(conn, [song])
