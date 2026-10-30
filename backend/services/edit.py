@@ -3,7 +3,7 @@ from structures.song_queue import SongQueue
 from models.song import Song
 from schemas.queue.setup_dto import SongDTO
 from models.current_song import CurrentSong
-
+from repositories.playlist import PlaylistRepository
 
 def parse_song_dto(song_dto: SongDTO) -> Song:
     return Song(
@@ -14,10 +14,11 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, queue: SongQueue, history: History, current: CurrentSong):
+    def __init__(self, queue: SongQueue, history: History, current: CurrentSong, playlist_repo: PlaylistRepository):
         self.queue = queue
         self.history = history
         self.current = current
+        self.playlist_repo = playlist_repo
 
     def setup_queue(self, songs: list[SongDTO]) -> SongQueue:
         # setup replaces everything: queue, history and the current song
@@ -62,11 +63,13 @@ class EditingService:
     def update_song_title(self, song_id: str, new_title: str) -> SongQueue:
         node = self._find_or_raise(song_id)
         node.song.title = new_title
+        self.playlist_repo.update_song(node.song)
         return self.queue
 
     def update_song_artist(self, song_id: str, new_artist: str) -> SongQueue:
         node = self._find_or_raise(song_id)
         node.song.artist = new_artist
+        self.playlist_repo.update_song(node.song)
         return self.queue
 
     def _find_or_raise(self, song_id: str):

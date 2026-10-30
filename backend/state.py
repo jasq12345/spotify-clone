@@ -13,10 +13,11 @@ db.init_db()
 
 queue = SongQueue()  # in memory only, the database holds songs and playlists
 
+playlist_repository = PlaylistRepository()
 history = History()
 current_song = CurrentSong()
 navigation_service = NavigationService(queue, history, current_song)
 statistics_service = StatisticsService(queue)
-editing_service = EditingService(queue, history, current_song)
+editing_service = EditingService(queue, history, current_song, playlist_repository)
 history_service = HistoryService(queue, history)
 playlist_service = PlaylistService(PlaylistRepository(), queue, history, current_song, editing_service)
