@@ -1,7 +1,7 @@
 import db
 from structures.history import History
 from models.current_song import CurrentSong
-from structures.playlist import Playlist
+from structures.song_queue import SongQueue
 from services.navigation import NavigationService
 from services.statistics import StatisticsService
 from services.edit import EditingService
@@ -9,14 +9,14 @@ from services.history import HistoryService
 
 db.init_db()
 
-playlist = Playlist()
-for song in db.load_playlist():
-    playlist.append(song)
-playlist._on_change = lambda: db.save_playlist(playlist)
+queue = SongQueue()
+for song in db.load_queue():
+    queue.append(song)
+queue._on_change = lambda: db.save_queue(queue)
 
 history = History()
 current_song = CurrentSong()
-navigation_service = NavigationService(playlist, history, current_song)
-statistics_service = StatisticsService(playlist)
-editing_service = EditingService(playlist, history, current_song)
-history_service = HistoryService(playlist, history)
+navigation_service = NavigationService(queue, history, current_song)
+statistics_service = StatisticsService(queue)
+editing_service = EditingService(queue, history, current_song)
+history_service = HistoryService(queue, history)

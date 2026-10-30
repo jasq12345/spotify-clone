@@ -3,41 +3,41 @@ from __future__ import annotations
 from structures.history import History
 from models.current_song import CurrentSong
 from models.song import Song
-from structures.playlist import Playlist
+from structures.song_queue import SongQueue
 
 
 class NavigationService:
-    def __init__(self, playlist: Playlist, history: History, current: CurrentSong):
-        self.playlist = playlist
+    def __init__(self, queue: SongQueue, history: History, current: CurrentSong):
+        self.queue = queue
         self.history = history
         self.current = current
 
-    def display_playlist(self) -> list[Song]:
-        return list(self.playlist)
+    def display_queue(self) -> list[Song]:
+        return list(self.queue)
 
-    def display_playlist_reversed(self) -> list[Song]:
-        return list(reversed(self.playlist))
+    def display_queue_reversed(self) -> list[Song]:
+        return list(reversed(self.queue))
 
     def load_from_history(self):
         while len(self.history) > 0:
-            self.playlist.append(self.history.pop_head())
+            self.queue.append(self.history.pop_head())
 
     def next_song(self) -> Song | None:
         if self.current.song is not None:
             self.history.append(self.current.song)
-        if len(self.playlist) == 0:
+        if len(self.queue) == 0:
             self.load_from_history()
-        if len(self.playlist) == 0:
+        if len(self.queue) == 0:
             return None
-        return self._select(self.playlist.pop_head())
+        return self._select(self.queue.pop_head())
 
     def prev_song(self) -> Song | None:
         if self.current.song is not None:
-            self.playlist.prepend(self.current.song)
+            self.queue.prepend(self.current.song)
         if len(self.history) > 0:
             song = self.history.pop_tail()
-        elif len(self.playlist) > 0:
-            song = self.playlist.pop_tail()
+        elif len(self.queue) > 0:
+            song = self.queue.pop_tail()
         else:
             return None
         return self._select(song)
@@ -48,29 +48,29 @@ class NavigationService:
         return None
 
     def shuffle(self) -> list[Song]:
-        self.playlist.shuffle()
-        return self.display_playlist()
+        self.queue.shuffle()
+        return self.display_queue()
 
     def reverse(self) -> list[Song]:
-        self.playlist.reverse()
-        return self.display_playlist()
+        self.queue.reverse()
+        return self.display_queue()
 
     def move_current_to_start(self) -> Song | None:
         # nothing is played before the current song any more
         while len(self.history) > 0:
-            self.playlist.prepend(self.history.pop_tail())
+            self.queue.prepend(self.history.pop_tail())
         return self.current.song
 
     def move_current_to_end(self) -> Song | None:
         # nothing is left to play after the current song, next wraps to the first one
-        while len(self.playlist) > 0:
-            self.history.append(self.playlist.pop_head())
+        while len(self.queue) > 0:
+            self.history.append(self.queue.pop_head())
         return self.current.song
 
     def delete_current(self) -> Song | None:
         # deleted song is dropped, not moved to history
-        if len(self.playlist) > 0:
-            return self._select(self.playlist.pop_head())
+        if len(self.queue) > 0:
+            return self._select(self.queue.pop_head())
         if len(self.history) > 0:
             return self._select(self.history.pop_tail())
         self.current.song = None

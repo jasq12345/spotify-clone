@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from models.song import Song
 from structures.history import History
-from structures.playlist import Playlist
+from structures.song_queue import SongQueue
 
 class HistoryService:
-    def __init__(self, playlist: Playlist, history: History):
+    def __init__(self, queue: SongQueue, history: History):
         self.history = history
-        self.playlist = playlist
+        self.queue = queue
 
     def get_history(self) -> list[Song]:
         return list(reversed(self.history))
@@ -40,8 +40,8 @@ class HistoryService:
         song_node = self.history.find(id)
         if song_node is None:
             raise ValueError("Song not found in history")
-        if self.playlist is None:
-            raise ValueError("Playlist is not configured")
+        if self.queue is None:
+            raise ValueError("Queue is not configured")
 
-        self.playlist.prepend(song_node.song)
-        return list(self.playlist)
+        self.queue.prepend(song_node.song)
+        return list(self.queue)

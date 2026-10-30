@@ -7,7 +7,7 @@ from models.song_node import SongNode
 from structures.song_list import SongList
 
 
-class Playlist(SongList):
+class SongQueue(SongList):
     """The queue of songs still to play — fully editable by the user."""
 
     def append(self, song: Song) -> SongNode:

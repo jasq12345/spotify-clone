@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 
 from models.song import Song
-from structures.playlist import Playlist
+from structures.song_queue import SongQueue
 
 DB_PATH = Path(__file__).parent / "playlist.db"
 
@@ -27,7 +27,7 @@ def init_db() -> None:
         """)
 
 
-def save_playlist(playlist: Playlist) -> None:
+def save_queue(queue: SongQueue) -> None:
     with _connect() as conn:
         conn.execute("DELETE FROM songs")
         conn.executemany(
@@ -35,12 +35,12 @@ def save_playlist(playlist: Playlist) -> None:
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 (i, s.id, s.title, s.artist, s.duration, s.album, s.play_count, s.added_at)
-                for i, s in enumerate(playlist)
+                for i, s in enumerate(queue)
             ],
         )
 
 
-def load_playlist() -> list[Song]:
+def load_queue() -> list[Song]:
     with _connect() as conn:
         rows = conn.execute(
             "SELECT id, title, artist, duration, album, play_count, added_at "

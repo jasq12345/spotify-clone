@@ -11,10 +11,10 @@ Accept: application/json
     });
 %}
 
-### ---------- playlist ----------
+### ---------- queue ----------
 
 ### Setup with empty playlist (setup replaces the playlist)
-POST http://127.0.0.1:8000/playlist/setup
+POST http://127.0.0.1:8000/queue/setup
 Content-Type: application/json
 
 {}
@@ -27,7 +27,7 @@ Content-Type: application/json
 %}
 
 ### Setup with songs
-POST http://127.0.0.1:8000/playlist/setup
+POST http://127.0.0.1:8000/queue/setup
 Content-Type: application/json
 
 {
@@ -47,8 +47,8 @@ Content-Type: application/json
     });
 %}
 
-### Get playlist (saves IDs of first two songs)
-GET http://127.0.0.1:8000/playlist
+### Get queue (saves IDs of first two songs)
+GET http://127.0.0.1:8000/queue
 Accept: application/json
 
 > {%
@@ -175,7 +175,7 @@ Content-Type: application/json
     });
 %}
 
-### Insert next to unknown ID (playlist unchanged)
+### Insert next to unknown ID (404, queue unchanged)
 POST http://127.0.0.1:8000/editing/insert-after
 Content-Type: application/json
 
@@ -185,10 +185,8 @@ Content-Type: application/json
 }
 
 > {%
-    client.test("unknown id changes nothing", function () {
-        var songs = response.body.songs;
-        client.assert(songs.length === 6, "length " + songs.length);
-        client.assert(!songs.some(function (s) { return s.title === "Never Added"; }), "song was added");
+    client.test("unknown id returns 404", function () {
+        client.assert(response.status === 404, "status " + response.status);
     });
 %}
 
@@ -464,7 +462,7 @@ GET http://127.0.0.1:8000/statistics/first
 ### ---------- setup replaces everything, plain add ----------
 
 ### Setup keeps duration and album
-POST http://127.0.0.1:8000/playlist/setup
+POST http://127.0.0.1:8000/queue/setup
 Content-Type: application/json
 
 {
@@ -482,7 +480,7 @@ Content-Type: application/json
 
 ###
 
-GET http://127.0.0.1:8000/playlist
+GET http://127.0.0.1:8000/queue
 
 > {%
     client.test("setup keeps duration and album", function () {
@@ -496,7 +494,7 @@ POST http://127.0.0.1:8000/navigation/next
 
 ###
 
-POST http://127.0.0.1:8000/playlist/setup
+POST http://127.0.0.1:8000/queue/setup
 Content-Type: application/json
 
 {"songs": {"1": {"title": "Song C", "artist": "Artist C"}}}

@@ -1,7 +1,7 @@
 from structures.history import History
-from structures.playlist import Playlist
+from structures.song_queue import SongQueue
 from models.song import Song
-from schemas.playlist.setup_dto import SongDTO
+from schemas.queue.setup_dto import SongDTO
 from models.current_song import CurrentSong
 
 
@@ -14,69 +14,69 @@ def parse_song_dto(song_dto: SongDTO) -> Song:
     )
 
 class EditingService:
-    def __init__(self, playlist: Playlist, history: History, current: CurrentSong):
-        self.playlist = playlist
+    def __init__(self, queue: SongQueue, history: History, current: CurrentSong):
+        self.queue = queue
         self.history = history
         self.current = current
 
-    def setup_playlist(self, songs: list[SongDTO]) -> Playlist:
+    def setup_queue(self, songs: list[SongDTO]) -> SongQueue:
         # setup replaces everything: queue, history and the current song
         self.remove_all_songs()
         for song_dto in songs:
-            self.playlist.append(parse_song_dto(song_dto))
-        return self.playlist
+            self.queue.append(parse_song_dto(song_dto))
+        return self.queue
 
-    def append_song(self, new_song: SongDTO) -> Playlist:
+    def append_song(self, new_song: SongDTO) -> SongQueue:
         song = parse_song_dto(new_song)
-        self.playlist.append(song)
-        return self.playlist
+        self.queue.append(song)
+        return self.queue
 
-    def prepend_song(self, new_song: SongDTO) -> Playlist:
+    def prepend_song(self, new_song: SongDTO) -> SongQueue:
         song = parse_song_dto(new_song)
-        self.playlist.prepend(song)
-        return self.playlist
+        self.queue.prepend(song)
+        return self.queue
 
-    def insert_song_after_selected(self, new_song: SongDTO, selected_song_id: str) -> Playlist:
+    def insert_song_after_selected(self, new_song: SongDTO, selected_song_id: str) -> SongQueue:
         node = self._find_or_raise(selected_song_id)
-        self.playlist.insert_after(node, parse_song_dto(new_song))
-        return self.playlist
+        self.queue.insert_after(node, parse_song_dto(new_song))
+        return self.queue
 
-    def insert_song_before_selected(self, new_song: SongDTO, selected_song_id: str) -> Playlist:
+    def insert_song_before_selected(self, new_song: SongDTO, selected_song_id: str) -> SongQueue:
         node = self._find_or_raise(selected_song_id)
-        self.playlist.insert_before(node, parse_song_dto(new_song))
-        return self.playlist
+        self.queue.insert_before(node, parse_song_dto(new_song))
+        return self.queue
 
-    def insert_song_before_current(self, new_song: SongDTO) -> Playlist:
+    def insert_song_before_current(self, new_song: SongDTO) -> SongQueue:
         self.history.append(parse_song_dto(new_song))
-        return self.playlist
+        return self.queue
 
-    def insert_song_after_current(self, new_song: SongDTO) -> Playlist:
-        self.playlist.prepend(parse_song_dto(new_song))
-        return self.playlist
+    def insert_song_after_current(self, new_song: SongDTO) -> SongQueue:
+        self.queue.prepend(parse_song_dto(new_song))
+        return self.queue
 
-    def remove_song(self, song_id: str) -> Playlist:
+    def remove_song(self, song_id: str) -> SongQueue:
         node = self._find_or_raise(song_id)
-        self.playlist.remove(node)
-        return self.playlist
+        self.queue.remove(node)
+        return self.queue
 
-    def update_song_title(self, song_id: str, new_title: str) -> Playlist:
+    def update_song_title(self, song_id: str, new_title: str) -> SongQueue:
         node = self._find_or_raise(song_id)
         node.song.title = new_title
-        return self.playlist
+        return self.queue
 
-    def update_song_artist(self, song_id: str, new_artist: str) -> Playlist:
+    def update_song_artist(self, song_id: str, new_artist: str) -> SongQueue:
         node = self._find_or_raise(song_id)
         node.song.artist = new_artist
-        return self.playlist
+        return self.queue
 
     def _find_or_raise(self, song_id: str):
-        node = self.playlist.find(song_id)
+        node = self.queue.find(song_id)
         if node is None:
             raise LookupError(f"song not found: {song_id}")
         return node
 
-    def remove_all_songs(self) -> Playlist:
-        self.playlist.clear()
+    def remove_all_songs(self) -> SongQueue:
+        self.queue.clear()
         self.history.clear()
         self.current.song = None
-        return self.playlist
+        return self.queue

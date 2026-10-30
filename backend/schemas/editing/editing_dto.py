@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from schemas.playlist.setup_dto import SongDTO
+from schemas.queue.setup_dto import SongDTO
 
 class InsertSongDTO(BaseModel): #before or after selected song
     new_song: SongDTO

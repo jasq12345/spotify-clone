@@ -10,12 +10,12 @@ router = APIRouter(prefix="/navigation", tags=["navigation"])
 
 @router.get("/songs")
 async def display_songs() -> dict[str, list[Song]]:
-    return {"songs": navigation_service.display_playlist()}
+    return {"songs": navigation_service.display_queue()}
 
 
 @router.get("/songs/reversed")
 async def display_songs_reversed() -> dict[str, list[Song]]:
-    return {"songs": navigation_service.display_playlist_reversed()}
+    return {"songs": navigation_service.display_queue_reversed()}
 
 
 @router.get("/current")
@@ -30,7 +30,7 @@ async def current_song() -> dict[str, Song | str | None]:
 async def next_song() -> dict[str, Song | str | None]:
     song = navigation_service.next_song()
     if song is None:
-        return {"song": navigation_service.get_current_song(), "message": "End of playlist"}
+        return {"song": navigation_service.get_current_song(), "message": "End of queue"}
     return {"song": song}
 
 
@@ -38,7 +38,7 @@ async def next_song() -> dict[str, Song | str | None]:
 async def prev_song() -> dict[str, Song | str | None]:
     song = navigation_service.prev_song()
     if song is None:
-        return {"song": navigation_service.get_current_song(), "message": "Start of playlist"}
+        return {"song": navigation_service.get_current_song(), "message": "Start of queue"}
     return {"song": song}
 
 
@@ -74,5 +74,5 @@ async def delete_current() -> dict[str, Song | str | None]:
         return {"song": None, "message": "No song selected"}
     song = navigation_service.delete_current()
     if song is None:
-        return {"song": None, "message": "Playlist is empty"}
+        return {"song": None, "message": "Queue is empty"}
     return {"song": song}
