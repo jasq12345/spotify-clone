@@ -509,8 +509,16 @@ h3 {
   background: #fff;
 }
 
+.bar {
+  cursor: pointer;
+}
+
 .bar:hover div {
   background: var(--green);
+}
+
+.icon.on img {
+  filter: invert(60%) sepia(80%) saturate(500%) hue-rotate(80deg);
 }
 
 .volume {

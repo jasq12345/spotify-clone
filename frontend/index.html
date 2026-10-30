@@ -125,7 +125,7 @@
       <div class="card">
         <div class="row">
           <h3>Next in queue</h3>
-          <button class="text-btn">Open queue</button>
+          <button class="text-btn" id="btn-open-queue">Open queue</button>
         </div>
         <div class="song">
           <div class="no-cover"></div>
@@ -153,10 +153,10 @@
           <button class="icon" id="btn-prev" title="Previous"><img src="images/backward-step-solid-full.svg" alt="previous" /></button>
           <button class="play-small" id="btn-play" title="Play"><img src="images/play.svg" alt="play" /></button>
           <button class="icon" id="btn-next" title="Next"><img src="images/forward-step-solid-full.svg" alt="next" /></button>
-          <button class="icon"><img src="images/repeat-solid-full.svg" alt="repeat" /></button>
+          <button class="icon" id="btn-repeat" title="Repeat"><img src="images/repeat-solid-full.svg" alt="repeat" /></button>
         </div>
         <div class="progress">
-          <span>0:00</span>
+          <span id="time-music">0:00</span>
           <div class="bar" id="song-line"><div></div></div>
           <span id="duration-music">0:00</span>
         </div>
@@ -166,7 +166,7 @@
         <button class="icon"><img src="images/microphone-solid-full.svg" alt="lyrics" /></button>
         <button class="icon"><img src="images/list-solid-full.svg" alt="queue" /></button>
         <button class="icon"><img src="images/bluetooth-brands-solid-full.svg" alt="devices" /></button>
-        <button class="icon"><img src="images/volume-solid-full.svg" alt="volume" /></button>
+        <button class="icon" id="btn-mute" title="Mute"><img src="images/volume-solid-full.svg" alt="volume" /></button>
         <div class="bar volume" id="volume-control"><div></div></div>
         <button class="icon"><img src="images/picture-in-picture-solid-full.svg" alt="mini player" /></button>
       </div>
