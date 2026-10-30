@@ -216,7 +216,7 @@ h3 {
   font-size: 14px;
 }
 
-.playlist {
+.queue {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -225,18 +225,18 @@ h3 {
   cursor: pointer;
 }
 
-.playlist:hover,
-.playlist.active {
+.queue:hover,
+.queue.active {
   background: var(--hover);
 }
 
-.playlist > img {
+.queue > img {
   width: 48px;
   height: 48px;
   border-radius: 4px;
 }
 
-.playlist .subtitle {
+.queue .subtitle {
   display: flex;
   align-items: center;
   gap: 6px;
