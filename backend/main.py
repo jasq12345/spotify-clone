@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from routers import navigation, queue, editing, statistics, history
+from routers import navigation, queue, editing, statistics, history, playlists
+from services.playlists import ConflictError
 
 app = FastAPI()
 
@@ -9,6 +10,11 @@ app = FastAPI()
 @app.exception_handler(LookupError)
 async def not_found_handler(request: Request, exc: LookupError):
     return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(ConflictError)
+async def conflict_handler(request: Request, exc: ConflictError):
+    return JSONResponse(status_code=409, content={"detail": str(exc)})
 
 # frontend is opened from file:// or a local dev server, so allow any origin
 app.add_middleware(
@@ -23,6 +29,7 @@ app.include_router(navigation.router)
 app.include_router(editing.router)
 app.include_router(statistics.router)
 app.include_router(history.router)
+app.include_router(playlists.router)
 
 @app.get("/")
 async def root():

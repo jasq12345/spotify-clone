@@ -19,7 +19,7 @@ Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any s
 ## API
 Every request with a body needs the `Content-Type: application/json` header, otherwise FastAPI answers 422.
 Song body (`SongDTO`): `{"title": "...", "artist": "...", "duration": 180, "album": "..."}` — `duration` and `album` are optional.
-Unknown song IDs return **404**.
+Unknown song or playlist IDs return **404**.
 The queue, history and current song live **only in memory** (gone after a restart). `backend/playlist.db` (SQLite) stores only songs and named playlists; an old-format `playlist.db` is cleaned up automatically on startup.
 
 | Method | Path | Body / notes |
@@ -44,6 +44,14 @@ The queue, history and current song live **only in memory** (gone after a restar
 | `GET` | `/history/last` / `/count` | previously played song / `{"songsCount", "maxSize"}` |
 | `GET` | `/history/search?title=...&artist=...` | at least one param, otherwise 422 |
 | `POST` | `/history/{id}/replay` | queue a song from history to play next (it stays in history) |
+| `GET` | `/playlists` | `{"playlists": [{"id", "name", "songsCount", "createdAt"}]}` |
+| `POST` | `/playlists` | `{"name": "..."}` → 201 with the playlist info, **409** if the name is taken |
+| `GET` | `/playlists/{id}` | `{"id", "name", "songs": [...]}` |
+| `PATCH` | `/playlists/{id}` | `{"name": "..."}` — rename, 409 if taken |
+| `DELETE` | `/playlists/{id}` | 204; the songs stay in the database |
+| `POST` | `/playlists/{id}/songs` | `SongDTO` → new song, or `{"song_id": "..."}` → a song from the queue, history, current song or another playlist; 201, **409** if already in the playlist |
+| `DELETE` | `/playlists/{id}/songs/{song_id}` | remove the song from this playlist only |
+| `POST` | `/playlists/{id}/play` | load the playlist into the queue — like `/queue/setup` it clears queue, history and current song; the saved playlist doesn't change |
 | `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
 | `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
 
@@ -54,37 +62,8 @@ a playlist must not lose songs that way. "Play playlist X" copies its songs into
 so navigation, history and shuffle keep working unchanged — shuffling the queue doesn't touch the saved playlist.
 One song can be in many playlists (many-to-many); editing a song's title/artist changes it everywhere.
 
-The database is ready (`db.py`: `songs`, `playlists`, `playlist_songs`, foreign keys on). The queue is never stored. Order: **P2** first (P3 can start in parallel once the method names below are agreed), P4 after P3.
-In `db.py` reuse `_connect()` (turns on foreign keys, commits/rolls back, closes), `row_to_song`/`song_to_row` and `upsert_songs`.
-
-### P2 — repository (new `repositories/playlist_repository.py`)
-Agree on these names first so P3 can start:
-```python
-class PlaylistRepository:
-    def list(self) -> list[PlaylistInfo]: ...                    # id, name, songs_count
-    def get(self, playlist_id: str) -> Playlist | None: ...       # songs ORDER BY position
-    def create(self, name: str) -> PlaylistInfo: ...              # raises if the name is taken
-    def rename(self, playlist_id: str, name: str) -> None: ...
-    def delete(self, playlist_id: str) -> None: ...
-    def add_song(self, playlist_id: str, song: Song) -> None: ...  # upsert into songs, position = MAX + 1
-    def remove_song(self, playlist_id: str, song_id: str) -> None: ...
-```
-- [ ] `models/playlist_info.py` — dataclass `PlaylistInfo(id, name, songs_count, created_at)`.
-- [ ] `structures/playlist.py` — `Playlist(SongList)` with `id` and `name`; same linked list as the queue, filled from the repository.
-
-### P3 — endpoints (new `services/playlists.py`, new `routers/playlists.py`, `schemas/playlists/`)
-| Method | Path | Body / notes |
-|---|---|---|
-| `GET` | `/playlists` | `{"playlists": [{"id", "name", "songsCount"}]}` |
-| `POST` | `/playlists` | `{"name": "..."}` → 201, **409** if the name is taken |
-| `GET` | `/playlists/{id}` | `{"id", "name", "songs": [...]}`, 404 if missing |
-| `PATCH` | `/playlists/{id}` | `{"name": "..."}` — rename, 409 on duplicate |
-| `DELETE` | `/playlists/{id}` | delete the playlist (its songs stay in `songs`) |
-| `POST` | `/playlists/{id}/songs` | `SongDTO` → new song, or `{"song_id": "..."}` → add a song from the queue (the service finds it in `queue` and upserts it into `songs`); 409 if already there |
-| `DELETE` | `/playlists/{id}/songs/{song_id}` | remove the song from this playlist only |
-| `POST` | `/playlists/{id}/play` | load the playlist into the queue — same as `/queue/setup` (clears queue, history, current song) |
-- [ ] Service raises `LookupError` for unknown ids (already mapped to 404 in `main.py`); add a similar handler for "name taken" → 409.
-- [ ] Register the router in `main.py` and the service/repository in `state.py` (tell the others).
+Code: `db.py` (tables), `repositories/playlist.py` (`PlaylistRepository`), `structures/playlist.py` (`Playlist(SongList)`),
+`services/playlists.py` (`PlaylistService`, `ConflictError` → 409), `routers/playlists.py`. Endpoints are in the API table above.
 
 ### P4 — glue
 - [ ] `PATCH /editing/update-title|artist/{id}` also saves the song row, so playlists show the new name.

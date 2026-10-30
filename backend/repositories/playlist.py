@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sqlite3
 import uuid
 from datetime import datetime
@@ -30,7 +32,7 @@ class PlaylistRepository:
                 (playlist_id,),
             ).fetchall()
 
-        playlist = Playlist(id=row[0], name=row[1])
+        playlist = Playlist(playlist_id=row[0], name=row[1])
         for song_row in song_rows:
             playlist.append(db.row_to_song(song_row))
         return playlist
@@ -73,6 +75,11 @@ class PlaylistRepository:
                 )
         except sqlite3.IntegrityError:
             raise ValueError(f"song already in playlist: {song.id}") from None
+
+    def find_song(self, song_id: str) -> Song | None:
+        with db._connect() as conn:
+            row = conn.execute(f"SELECT {db.SONG_COLUMNS} FROM songs WHERE id = ?", (song_id,)).fetchone()
+        return db.row_to_song(row) if row else None
 
     def remove_song(self, playlist_id: str, song_id: str) -> None:
         with db._connect() as conn:

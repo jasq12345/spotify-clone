@@ -6,9 +6,9 @@ from structures.song_list import SongList
 
 
 class Playlist(SongList):
-    def __init__(self, id: str, name: str):
+    def __init__(self, playlist_id: str, name: str):
         super().__init__()
-        self.id = id
+        self.id = playlist_id
         self.name = name
 
     def append(self, song: Song) -> SongNode:

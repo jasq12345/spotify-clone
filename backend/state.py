@@ -6,6 +6,8 @@ from services.navigation import NavigationService
 from services.statistics import StatisticsService
 from services.edit import EditingService
 from services.history import HistoryService
+from services.playlists import PlaylistService
+from repositories.playlist import PlaylistRepository
 
 db.init_db()
 
@@ -17,3 +19,4 @@ navigation_service = NavigationService(queue, history, current_song)
 statistics_service = StatisticsService(queue)
 editing_service = EditingService(queue, history, current_song)
 history_service = HistoryService(queue, history)
+playlist_service = PlaylistService(PlaylistRepository(), queue, history, current_song, editing_service)

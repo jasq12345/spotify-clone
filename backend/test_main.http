@@ -559,3 +559,193 @@ Content-Type: application/json
     });
 %}
 
+
+### ---------- named playlists (stored in playlist.db, names are unique per run) ----------
+
+### Create a playlist
+POST http://127.0.0.1:8000/playlists
+Content-Type: application/json
+
+{"name": "Chill {{$timestamp}}"}
+
+> {%
+    client.test("create playlist", function () {
+        client.assert(response.status === 201, "status " + response.status);
+        client.assert(response.body.songsCount === 0, "songsCount " + response.body.songsCount);
+    });
+    client.global.set("playlistId", response.body.id);
+    client.global.set("playlistName", response.body.name);
+%}
+
+### Same name again
+POST http://127.0.0.1:8000/playlists
+Content-Type: application/json
+
+{"name": "{{playlistName}}"}
+
+> {%
+    client.test("duplicate name is rejected", function () {
+        client.assert(response.status === 409, "status " + response.status);
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/playlists
+
+> {%
+    client.test("list contains the new playlist", function () {
+        var found = response.body.playlists.filter(function (p) { return p.id === client.global.get("playlistId"); });
+        client.assert(found.length === 1, "not listed");
+    });
+%}
+
+### Add a new song
+POST http://127.0.0.1:8000/playlists/{{playlistId}}/songs
+Content-Type: application/json
+
+{"title": "Saved Song", "artist": "Artist P", "duration": 200}
+
+> {%
+    client.test("add new song", function () {
+        client.assert(response.status === 201, "status " + response.status);
+        client.assert(response.body.songs.length === 1, "length " + response.body.songs.length);
+        client.assert(response.body.songs[0].duration === 200, "duration lost");
+    });
+%}
+
+### Add a song from the queue by id
+GET http://127.0.0.1:8000/queue
+
+> {%
+    client.global.set("queueSongId", response.body.songs[0].id);
+%}
+
+###
+
+POST http://127.0.0.1:8000/playlists/{{playlistId}}/songs
+Content-Type: application/json
+
+{"song_id": "{{queueSongId}}"}
+
+> {%
+    client.test("add song from the queue", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 2, "length " + songs.length);
+        client.assert(songs[1].id === client.global.get("queueSongId"), "wrong song");
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/playlists/{{playlistId}}/songs
+Content-Type: application/json
+
+{"song_id": "{{queueSongId}}"}
+
+> {%
+    client.test("same song twice is rejected", function () {
+        client.assert(response.status === 409, "status " + response.status);
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/playlists/{{playlistId}}/songs
+Content-Type: application/json
+
+{"song_id": "does-not-exist"}
+
+> {%
+    client.test("unknown song id", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
+
+###
+
+PATCH http://127.0.0.1:8000/playlists/{{playlistId}}
+Content-Type: application/json
+
+{"name": "{{playlistName}} renamed"}
+
+> {%
+    client.test("rename", function () {
+        client.assert(response.body.name === client.global.get("playlistName") + " renamed", "name " + response.body.name);
+        client.assert(response.body.songs.length === 2, "songs lost on rename");
+    });
+%}
+
+### Play: the playlist replaces the queue
+POST http://127.0.0.1:8000/playlists/{{playlistId}}/play
+
+> {%
+    client.test("play loads the playlist into the queue", function () {
+        var titles = response.body.songs.map(function (s) { return s.title; });
+        client.assert(titles.length === 2 && titles[0] === "Saved Song", titles.join("|"));
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/navigation/current
+
+> {%
+    client.test("play resets the current song", function () {
+        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    });
+%}
+
+### Playing doesn't change the saved playlist
+POST http://127.0.0.1:8000/navigation/next
+
+###
+
+GET http://127.0.0.1:8000/playlists/{{playlistId}}
+
+> {%
+    client.test("playlist keeps its songs after playing", function () {
+        client.assert(response.body.songs.length === 2, "length " + response.body.songs.length);
+    });
+    client.global.set("savedSongId", response.body.songs[0].id);
+%}
+
+###
+
+DELETE http://127.0.0.1:8000/playlists/{{playlistId}}/songs/{{savedSongId}}
+
+> {%
+    client.test("remove song from playlist", function () {
+        client.assert(response.body.songs.length === 1, "length " + response.body.songs.length);
+    });
+%}
+
+###
+
+DELETE http://127.0.0.1:8000/playlists/{{playlistId}}/songs/{{savedSongId}}
+
+> {%
+    client.test("removing it again", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
+
+###
+
+DELETE http://127.0.0.1:8000/playlists/{{playlistId}}
+
+> {%
+    client.test("delete playlist", function () {
+        client.assert(response.status === 204, "status " + response.status);
+    });
+%}
+
+###
+
+GET http://127.0.0.1:8000/playlists/{{playlistId}}
+
+> {%
+    client.test("deleted playlist is gone", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
