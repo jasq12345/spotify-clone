@@ -14,7 +14,7 @@ uv run uvicorn main:app --reload
 API: http://127.0.0.1:8000 (docs: http://127.0.0.1:8000/docs)
 
 ## Frontend
-Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any static server.
+Plain HTML/JS — open `frontend/index.html` in a browser or serve it with any static server. It talks to the backend at `http://127.0.0.1:8000` (`API` in `frontend/app.js`).
 
 ## API
 Every request with a body needs the `Content-Type: application/json` header, otherwise FastAPI answers 422.
@@ -58,26 +58,23 @@ The queue, history and current song live **only in memory** (gone after a restar
 ## Named playlists
 
 Playlists are saved, named lists of songs. They are **not** the queue: playing a song pops it from the queue into history,
-a playlist must not lose songs that way. "Play playlist X" copies its songs into the queue (like `/queue/setup` does now),
+a playlist must not lose songs that way. "Play playlist X" copies its songs into the queue (like `/queue/setup`),
 so navigation, history and shuffle keep working unchanged — shuffling the queue doesn't touch the saved playlist.
-One song can be in many playlists (many-to-many); editing a song's title/artist changes it everywhere.
+A song is stored once in `songs` and can be in many playlists (many-to-many), at most once per playlist.
 
 Code: `db.py` (tables), `repositories/playlist.py` (`PlaylistRepository`), `structures/playlist.py` (`Playlist(SongList)`),
 `services/playlists.py` (`PlaylistService`, `ConflictError` → 409), `routers/playlists.py`. Endpoints are in the API table above.
 
-### P4 — glue
-- [ ] `PATCH /editing/update-title|artist/{id}` also saves the song row, so playlists show the new name.
-- [ ] Decide what `/queue/setup` becomes: keep it as "play these songs without saving", or turn it into "create a playlist and play it".
-
 ## Backend architecture notes
 
 How the backend is built: `queue` (`SongQueue`) is the live queue (songs still to play), `history` holds the last 15 played songs,
-`current_song` is the song playing now and is **not** inside `queue` or `history`. All three live in `state.py`.
+`current_song` is the song playing now and is **not** inside `queue` or `history`. All three live in `state.py`, in memory only.
 
-Both `SongQueue` and `History` inherit from the abstract `SongList` (`structures/song_list.py`), which holds the shared
+`SongQueue`, `History` and `Playlist` inherit from the abstract `SongList` (`structures/song_list.py`), which holds the shared
 doubly linked list: `head`/`tail`/`size`, `find`, `pop_head`/`pop_tail`, `clear`, iteration and `len`.
 Each subclass exposes only what makes sense for it:
+- `Playlist` (`structures/playlist.py`) — a named playlist loaded from the database by `PlaylistRepository`; changes go through the repository, not the list.
 - `SongQueue` (`structures/song_queue.py`) — fully editable: `append`, `prepend`, `insert_after`/`insert_before`, `remove`, `reverse`, `shuffle`, `move_to_head`/`move_to_tail`.
-- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all` and `POST /queue/setup` clear it.
+- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all`, `POST /queue/setup` and `POST /playlists/{id}/play` clear it.
 
 Each person owns their own files, so nobody edits the same file. `state.py` changes only if really needed — tell the others first.
