@@ -6,8 +6,8 @@ from fastapi import APIRouter, Response
 
 from models.playlist_info import PlaylistInfo
 from models.song import Song
-from schemas.playlists.playlist_dto import ExistingSongDTO, PlaylistNameDTO
-from schemas.queue.setup_dto import SongDTO
+from schemas.playlists.playlist_dto import PlaylistNameDTO
+from schemas.queue.setup_dto import ExistingSongDTO, SongDTO
 from state import playlist_service
 from structures.playlist import Playlist
 

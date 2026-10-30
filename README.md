@@ -27,8 +27,8 @@ The queue, history and current song live **only in memory** (gone after a restar
 | `POST` | `/queue/setup` | `{"songs": {"1": SongDTO, ...}}` — **replaces everything**: queue, history and current song. `{}` = empty queue. |
 | `GET` | `/queue` | the queue |
 | `GET` | `/queue/combined` | `{"history": [...], "current": Song \| null, "queue": [...]}` — everything for the main view in one call (history oldest first) |
-| `POST` | `/editing/append` | `SongDTO` — add at the end of the queue |
-| `POST` | `/editing/prepend` | `SongDTO` — add at the start of the queue (plays next) |
+| `POST` | `/editing/append` | `SongDTO` → new song, or `{"song_id": "..."}` → an existing song (from a playlist, history or the current song, keeps its id); added at the end of the queue, **409** if it's already in the queue |
+| `POST` | `/editing/prepend` | same body as `append`, added at the start of the queue (plays next) |
 | `POST` | `/editing/insert-after` / `/insert-before` | `{"new_song": SongDTO, "selected_song_id": "..."}` — next to a song in the queue |
 | `POST` | `/editing/insert-after-current` / `/insert-before-current` | `{"new_song": SongDTO}` — after = plays next, before = goes to history |
 | `PATCH` | `/editing/update-title/{id}` / `/update-artist/{id}` | `{"new_title": "..."}` / `{"new_artist": "..."}` |

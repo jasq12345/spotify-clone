@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from models.song import Song
 from schemas.editing.editing_dto import InsertSongAtCurrentDTO, InsertSongDTO, UpdateSongArtistDTO, UpdateSongTitleDTO
-from schemas.queue.setup_dto import SongDTO
+from schemas.queue.setup_dto import ExistingSongDTO, SongDTO
 from state import editing_service, navigation_service
 
 router = APIRouter(prefix="/editing", tags=["editing"])
@@ -54,11 +54,17 @@ async def insert_song_before_current(dto: InsertSongAtCurrentDTO) -> dict[str, l
     return {"songs": list(queue)}
 
 @router.post("/append")
-async def append_song(dto: SongDTO) -> dict[str, list[Song]]:
-    queue = editing_service.append_song(dto)
+async def append_song(dto: SongDTO | ExistingSongDTO) -> dict[str, list[Song]]:
+    if isinstance(dto, ExistingSongDTO):
+        queue = editing_service.append_existing_song(dto.song_id)
+    else:
+        queue = editing_service.append_song(dto)
     return {"songs": list(queue)}
 
 @router.post("/prepend")
-async def prepend_song(dto: SongDTO) -> dict[str, list[Song]]:
-    queue = editing_service.prepend_song(dto)
+async def prepend_song(dto: SongDTO | ExistingSongDTO) -> dict[str, list[Song]]:
+    if isinstance(dto, ExistingSongDTO):
+        queue = editing_service.prepend_existing_song(dto.song_id)
+    else:
+        queue = editing_service.prepend_song(dto)
     return {"songs": list(queue)}

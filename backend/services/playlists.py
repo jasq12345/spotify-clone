@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from errors import ConflictError
 from models.current_song import CurrentSong
 from models.playlist_info import PlaylistInfo
 from models.song import Song
@@ -9,10 +10,6 @@ from services.edit import EditingService, parse_song_dto
 from structures.history import History
 from structures.playlist import Playlist
 from structures.song_queue import SongQueue
-
-
-class ConflictError(Exception):
-    """Name already taken / song already in the playlist — mapped to 409 in main.py."""
 
 
 class PlaylistService:
@@ -61,7 +58,7 @@ class PlaylistService:
         return self._add_song(playlist_id, parse_song_dto(song_dto))
 
     def add_existing_song(self, playlist_id: str, song_id: str) -> Playlist:
-        return self._add_song(playlist_id, self._find_song(song_id))
+        return self._add_song(playlist_id, self.editing_service.find_song(song_id))
 
     def remove_song(self, playlist_id: str, song_id: str) -> Playlist:
         playlist = self.get_playlist(playlist_id)
@@ -85,16 +82,3 @@ class PlaylistService:
         except ValueError as error:
             raise ConflictError(str(error)) from None
         return self.get_playlist(playlist_id)
-
-    def _find_song(self, song_id: str) -> Song:
-        # songs being played live only in memory, saved ones are in the database
-        if self.current.song is not None and self.current.song.id == song_id:
-            return self.current.song
-        for songs in (self.queue, self.history):
-            node = songs.find(song_id)
-            if node is not None:
-                return node.song
-        song = self.repository.find_song(song_id)
-        if song is None:
-            raise LookupError(f"song not found: {song_id}")
-        return song

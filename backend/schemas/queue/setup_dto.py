@@ -8,6 +8,9 @@ class SongDTO(BaseModel):
     duration: int | None = Field(default=None, ge=0)
     album: str | None = Field(default=None, min_length=1, max_length=30)
 
+class ExistingSongDTO(BaseModel):  # a song that already exists: queue, history, current song or a playlist
+    song_id: str = Field(..., min_length=1)
+
 class QueueSetupDTO(BaseModel):
     songsCount: int = 0
     songs: dict[int, SongDTO] = Field(default_factory=dict)

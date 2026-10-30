@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from routers import navigation, queue, editing, statistics, history, playlists
-from services.playlists import ConflictError
+from errors import ConflictError
 
 app = FastAPI()
 

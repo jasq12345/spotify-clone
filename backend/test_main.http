@@ -749,3 +749,91 @@ GET http://127.0.0.1:8000/playlists/{{playlistId}}
         client.assert(response.status === 404, "status " + response.status);
     });
 %}
+
+### ---------- add an existing song to the queue by id ----------
+
+### A saved song that isn't in the queue
+POST http://127.0.0.1:8000/playlists
+Content-Type: application/json
+
+{"name": "Queue src {{$timestamp}}"}
+
+> {%
+    client.global.set("srcPlaylistId", response.body.id);
+%}
+
+###
+
+POST http://127.0.0.1:8000/playlists/{{srcPlaylistId}}/songs
+Content-Type: application/json
+
+{"title": "From Playlist", "artist": "Artist Q"}
+
+> {%
+    client.global.set("srcSongId", response.body.songs[0].id);
+%}
+
+###
+
+DELETE http://127.0.0.1:8000/editing/remove-all
+
+###
+
+POST http://127.0.0.1:8000/editing/append
+Content-Type: application/json
+
+{"song_id": "{{srcSongId}}"}
+
+> {%
+    client.test("append an existing song keeps its id", function () {
+        var songs = response.body.songs;
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(songs.length === 1 && songs[0].id === client.global.get("srcSongId"), JSON.stringify(songs));
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/editing/prepend
+Content-Type: application/json
+
+{"song_id": "{{srcSongId}}"}
+
+> {%
+    client.test("the same song twice in the queue is rejected", function () {
+        client.assert(response.status === 409, "status " + response.status);
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/editing/append
+Content-Type: application/json
+
+{"song_id": "does-not-exist"}
+
+> {%
+    client.test("unknown song id", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
+
+### Renaming it in the queue renames it in the playlist (same song)
+PATCH http://127.0.0.1:8000/editing/update-title/{{srcSongId}}
+Content-Type: application/json
+
+{"new_title": "From Playlist 2"}
+
+###
+
+GET http://127.0.0.1:8000/playlists/{{srcPlaylistId}}
+
+> {%
+    client.test("playlist sees the new title", function () {
+        client.assert(response.body.songs[0].title === "From Playlist 2", "title " + response.body.songs[0].title);
+    });
+%}
+
+###
+
+DELETE http://127.0.0.1:8000/playlists/{{srcPlaylistId}}
