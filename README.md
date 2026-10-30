@@ -46,20 +46,10 @@ The queue is saved to `backend/playlist.db` (SQLite) and loaded on startup; hist
 | `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
 | `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
 
-`backend/test_main.http` runs through these endpoints in order — restart the server and use "Run All Requests in File".
-
 ## To-do
 
 ### Backend
 - [ ] **B9.** Combined view endpoint — one response with both the queue and the history, so the frontend can render its main view in a single call, e.g. `GET /queue/view` → `{"songs": [...], "history": [...], "current": Song | null}`.
-- [ ] Add `pytest` as a dev dependency and write unit tests for `SongQueue`/`History`/`SongList`: empty list, one song, insert/remove at head/tail/middle, `reverse`, `shuffle` (same songs, same size, `prev`/`next` consistent), the `History` 15-song limit, `SongList` can't be instantiated directly, `History` has no `remove`/`insert_*`/`shuffle`/`reverse`.
-
-### Frontend
-- [ ] 16. Ask the user to confirm before `DELETE /editing/remove-all` — the backend clears without asking.
-- [ ] 26. Provide a menu that lets the user choose any operation.
-- [ ] 27. Continue displaying the menu until the user chooses to exit.
-- [ ] 28. Validate user input, including invalid menu choices and song IDs.
-- [ ] 29. Handle an empty queue and a queue containing only one song (navigation already handles this backend-side).
 
 ## Named playlists
 
@@ -68,7 +58,7 @@ a playlist must not lose songs that way. "Play playlist X" copies its songs into
 so navigation, history and shuffle keep working unchanged — shuffling the queue doesn't touch the saved playlist.
 One song can be in many playlists (many-to-many); editing a song's title/artist changes it everywhere.
 
-Order: **P1 → P2** first (P3 can start in parallel once the method names below are agreed), P4 and frontend after P3.
+Order: **P1 → P2** first (P3 can start in parallel once the method names below are agreed), P4 after P3.
 
 ### P1 — database (`db.py`)
 - [ ] Turn on foreign keys in `_connect()`: `conn.execute("PRAGMA foreign_keys = ON")` (SQLite has them off by default, `ON DELETE CASCADE` won't work otherwise).
@@ -109,7 +99,6 @@ class PlaylistRepository:
 ```
 - [ ] `models/playlist_info.py` — dataclass `PlaylistInfo(id, name, songs_count, created_at)`.
 - [ ] `structures/playlist.py` — `Playlist(SongList)` with `id` and `name`; same linked list as the queue, filled from the repository.
-- [ ] Tests with `sqlite3.connect(":memory:")`: create/rename/delete, duplicate name, add/remove song, order kept, deleting a playlist keeps its songs.
 
 ### P3 — endpoints (new `services/playlists.py`, new `routers/playlists.py`, `schemas/playlists/`)
 | Method | Path | Body / notes |
@@ -125,15 +114,9 @@ class PlaylistRepository:
 - [ ] Service raises `LookupError` for unknown ids (already mapped to 404 in `main.py`); add a similar handler for "name taken" → 409.
 - [ ] Register the router in `main.py` and the service/repository in `state.py` (tell the others).
 
-### P4 — glue and tests
+### P4 — glue
 - [ ] `PATCH /editing/update-title|artist/{id}` also saves the song row, so playlists show the new name.
 - [ ] Decide what `/queue/setup` becomes: keep it as "play these songs without saving", or turn it into "create a playlist and play it".
-- [ ] Extend `test_main.http`: create two playlists, duplicate name → 409, add songs, rename, play → `/queue` has the playlist's songs, delete → 404.
-
-### Frontend — playlists
-- [ ] Sidebar list of playlists (`GET /playlists`), create/rename/delete.
-- [ ] Playlist view with its songs, "Play" button → `POST /playlists/{id}/play`, then refresh the queue.
-- [ ] "Add to playlist" on a song in the queue → `POST /playlists/{id}/songs` with `{"song_id": ...}`.
 
 ## Backend architecture notes
 
