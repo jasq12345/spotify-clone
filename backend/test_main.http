@@ -691,13 +691,25 @@ POST http://127.0.0.1:8000/playlists/{{playlistId}}/play
 GET http://127.0.0.1:8000/navigation/current
 
 > {%
-    client.test("play resets the current song", function () {
-        client.assert(response.body.song === null, "song " + JSON.stringify(response.body.song));
+    client.test("play keeps the current song (it goes to history on next)", function () {
+        client.assert(response.body.song !== null, "current song was cleared");
+        client.global.set("songBeforePlay", response.body.song.id);
     });
 %}
 
 ### Playing doesn't change the saved playlist
 POST http://127.0.0.1:8000/navigation/next
+
+###
+
+GET http://127.0.0.1:8000/history
+
+> {%
+    client.test("switching playlists keeps history", function () {
+        client.assert(response.body.songs.length > 0, "history is empty");
+        client.assert(response.body.songs[0].id === client.global.get("songBeforePlay"), "previous song not in history");
+    });
+%}
 
 ###
 
@@ -800,8 +812,22 @@ Content-Type: application/json
 {"song_id": "{{srcSongId}}"}
 
 > {%
-    client.test("the same song twice in the queue is rejected", function () {
-        client.assert(response.status === 409, "status " + response.status);
+    client.test("the same song can be queued twice", function () {
+        var songs = response.body.songs;
+        client.assert(response.status === 200, "status " + response.status);
+        client.assert(songs.length === 2 && songs[0].id === songs[1].id, JSON.stringify(songs));
+    });
+%}
+
+###
+
+POST http://127.0.0.1:8000/playlists/{{srcPlaylistId}}/queue
+
+> {%
+    client.test("queue a whole playlist at the end", function () {
+        var songs = response.body.songs;
+        client.assert(songs.length === 3, "length " + songs.length);
+        client.assert(songs[2].id === client.global.get("srcSongId"), "not appended");
     });
 %}
 

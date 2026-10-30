@@ -65,3 +65,8 @@ async def remove_song(playlist_id: str, song_id: str) -> dict[str, Any]:
 @router.post("/{playlist_id}/play")
 async def play_playlist(playlist_id: str) -> dict[str, list[Song]]:
     return {"songs": list(playlist_service.play_playlist(playlist_id))}
+
+
+@router.post("/{playlist_id}/queue")
+async def queue_playlist(playlist_id: str) -> dict[str, list[Song]]:
+    return {"songs": list(playlist_service.queue_playlist(playlist_id))}

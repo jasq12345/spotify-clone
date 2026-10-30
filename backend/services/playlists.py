@@ -68,12 +68,20 @@ class PlaylistService:
         return self.get_playlist(playlist_id)
 
     def play_playlist(self, playlist_id: str) -> SongQueue:
-        # like /queue/setup: the playlist replaces queue, history and the current song
+        # the playlist replaces the queue; history and the current song stay, so prev goes back to the old songs
         playlist = self.get_playlist(playlist_id)
-        self.editing_service.remove_all_songs()
-        for song in playlist:
-            self.queue.append(song)
+        self.queue.clear()
+        self._append_to_queue(playlist)
         return self.queue
+
+    def queue_playlist(self, playlist_id: str) -> SongQueue:
+        # add the whole playlist at the end of the queue, nothing is removed
+        self._append_to_queue(self.get_playlist(playlist_id))
+        return self.queue
+
+    def _append_to_queue(self, playlist: Playlist) -> None:
+        for song in playlist:
+            self.queue.append(self.editing_service.find_in_memory(song.id) or song)
 
     def _add_song(self, playlist_id: str, song: Song) -> Playlist:
         self.get_playlist(playlist_id)

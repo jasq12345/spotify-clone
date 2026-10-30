@@ -27,7 +27,7 @@ The queue, history and current song live **only in memory** (gone after a restar
 | `POST` | `/queue/setup` | `{"songs": {"1": SongDTO, ...}}` — **replaces everything**: queue, history and current song. `{}` = empty queue. |
 | `GET` | `/queue` | the queue |
 | `GET` | `/queue/combined` | `{"history": [...], "current": Song \| null, "queue": [...]}` — everything for the main view in one call (history oldest first) |
-| `POST` | `/editing/append` | `SongDTO` → new song, or `{"song_id": "..."}` → an existing song (from a playlist, history or the current song, keeps its id); added at the end of the queue, **409** if it's already in the queue |
+| `POST` | `/editing/append` | `SongDTO` → new song, or `{"song_id": "..."}` → an existing song (from a playlist, history or the current song, keeps its id); added at the end of the queue. The same song may be queued more than once. |
 | `POST` | `/editing/prepend` | same body as `append`, added at the start of the queue (plays next) |
 | `POST` | `/editing/insert-after` / `/insert-before` | `{"new_song": SongDTO, "selected_song_id": "..."}` — next to a song in the queue |
 | `POST` | `/editing/insert-after-current` / `/insert-before-current` | `{"new_song": SongDTO}` — after = plays next, before = goes to history |
@@ -51,15 +51,18 @@ The queue, history and current song live **only in memory** (gone after a restar
 | `DELETE` | `/playlists/{id}` | 204; the songs stay in the database |
 | `POST` | `/playlists/{id}/songs` | `SongDTO` → new song, or `{"song_id": "..."}` → a song from the queue, history, current song or another playlist; 201, **409** if already in the playlist |
 | `DELETE` | `/playlists/{id}/songs/{song_id}` | remove the song from this playlist only |
-| `POST` | `/playlists/{id}/play` | load the playlist into the queue — like `/queue/setup` it clears queue, history and current song; the saved playlist doesn't change |
+| `POST` | `/playlists/{id}/play` | replace the queue with the playlist; history and the current song stay (call `/navigation/next` to start it, `prev` goes back to the old songs). The saved playlist doesn't change. |
+| `POST` | `/playlists/{id}/queue` | add the whole playlist at the end of the queue without removing anything — e.g. A, then B, then A again |
 | `GET` | `/statistics/count`, `/first`, `/last`, `/longest-title` | |
 | `GET` | `/statistics/artist/{name}`, `/title/{title}`, `/artist/{name}/percentage` | |
 
 ## Named playlists
 
 Playlists are saved, named lists of songs. They are **not** the queue: playing a song pops it from the queue into history,
-a playlist must not lose songs that way. "Play playlist X" copies its songs into the queue (like `/queue/setup`),
+a playlist must not lose songs that way. "Play playlist X" copies its songs into the queue (history is kept), "queue playlist X" appends them,
 so navigation, history and shuffle keep working unchanged — shuffling the queue doesn't touch the saved playlist.
+A song can be in the queue several times; it's the same object in memory, so renaming it changes every copy,
+and id-based queue operations (`remove`, `insert-after`, ...) act on its first occurrence.
 A song is stored once in `songs` and can be in many playlists (many-to-many), at most once per playlist.
 
 Code: `db.py` (tables), `repositories/playlist.py` (`PlaylistRepository`), `structures/playlist.py` (`Playlist(SongList)`),
@@ -75,6 +78,6 @@ doubly linked list: `head`/`tail`/`size`, `find`, `pop_head`/`pop_tail`, `clear`
 Each subclass exposes only what makes sense for it:
 - `Playlist` (`structures/playlist.py`) — a named playlist loaded from the database by `PlaylistRepository`; changes go through the repository, not the list.
 - `SongQueue` (`structures/song_queue.py`) — fully editable: `append`, `prepend`, `insert_after`/`insert_before`, `remove`, `reverse`, `shuffle`, `move_to_head`/`move_to_tail`.
-- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all`, `POST /queue/setup` and `POST /playlists/{id}/play` clear it.
+- `History` — read-only for the user: songs only enter through `append` (oldest falls off past `max_size`) and leave from the ends when navigation moves them back. No `remove`, no insert, no reordering — the user can't delete a song from history. Only `DELETE /editing/remove-all` and `POST /queue/setup` clear it.
 
 Each person owns their own files, so nobody edits the same file. `state.py` changes only if really needed — tell the others first.

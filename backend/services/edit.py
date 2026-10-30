@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 from structures.history import History
 from structures.song_queue import SongQueue
 from models.song import Song
 from schemas.queue.setup_dto import SongDTO
 from models.current_song import CurrentSong
 from repositories.playlist import PlaylistRepository
-from errors import ConflictError
 
 def parse_song_dto(song_dto: SongDTO) -> Song:
     return Song(
@@ -39,31 +40,29 @@ class EditingService:
         return self.queue
 
     def append_existing_song(self, song_id: str) -> SongQueue:
-        self.queue.append(self._existing_song_for_queue(song_id))
+        # the same song may be queued more than once (e.g. playlist A, B, then A again)
+        self.queue.append(self.find_song(song_id))
         return self.queue
 
     def prepend_existing_song(self, song_id: str) -> SongQueue:
-        self.queue.prepend(self._existing_song_for_queue(song_id))
+        self.queue.prepend(self.find_song(song_id))
         return self.queue
 
     def find_song(self, song_id: str) -> Song:
-        # songs being played live only in memory, saved ones are in the database
+        song = self.find_in_memory(song_id) or self.playlist_repo.find_song(song_id)
+        if song is None:
+            raise LookupError(f"song not found: {song_id}")
+        return song
+
+    def find_in_memory(self, song_id: str) -> Song | None:
+        # one Song object per id in memory, so editing a song changes every copy in the queue and history
         if self.current.song is not None and self.current.song.id == song_id:
             return self.current.song
         for songs in (self.queue, self.history):
             node = songs.find(song_id)
             if node is not None:
                 return node.song
-        song = self.playlist_repo.find_song(song_id)
-        if song is None:
-            raise LookupError(f"song not found: {song_id}")
-        return song
-
-    def _existing_song_for_queue(self, song_id: str) -> Song:
-        # id-based operations (remove, update, insert next to) need each song in the queue at most once
-        if self.queue.find(song_id) is not None:
-            raise ConflictError(f"song already in the queue: {song_id}")
-        return self.find_song(song_id)
+        return None
 
     def insert_song_after_selected(self, new_song: SongDTO, selected_song_id: str) -> SongQueue:
         node = self._find_or_raise(selected_song_id)
